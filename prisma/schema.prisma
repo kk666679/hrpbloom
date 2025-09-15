@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id             Int        @id @default(autoincrement())
+  name           String
+  registrationNo String     @unique
+  address        String
+  contactNo      String
+  email          String
+  employees      Employee[]
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+}
+
+model Employee {
+  id           Int            @id @default(autoincrement())
+  employeeId   String         @unique
+  firstName    String
+  lastName     String
+  nric         String         @unique
+  passportNo   String?
+  email        String         @unique
+  phone        String
+  address      String
+  dateOfBirth  DateTime
+  dateJoined   DateTime
+  department   String
+  position     String
+  salary       Float
+  epfNo        String?
+  socsoNo      String?
+  taxNo        String?
+  bankAccount  String?
+  status       EmployeeStatus @default(ACTIVE)
+  leaveBalance Int            @default(21)
+  password     String
+  role         UserRole       @default(EMPLOYEE)
+  documents    Document[]
+  leaves       Leave[]
+  attendances  Attendance[]
+  payrolls     Payroll[]
+  company      Company        @relation(fields: [companyId], references: [id])
+  companyId    Int
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  PROBATION
+  RESIGNED
+  TERMINATED
+}
+
+enum UserRole {
+  ADMIN
+  HR
+  MANAGER
+  EMPLOYEE
+}
+
+model Document {
+  id         Int      @id @default(autoincrement())
+  name       String
+  type       String
+  key        String   @unique
+  url        String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  employeeId Int
+  uploadedAt DateTime @default(now())
+}
+
+model Leave {
+  id         Int         @id @default(autoincrement())
+  type       LeaveType
+  startDate  DateTime
+  endDate    DateTime
+  reason     String
+  status     LeaveStatus @default(PENDING)
+  employee   Employee    @relation(fields: [employeeId], references: [id])
+  employeeId Int
+  appliedAt  DateTime    @default(now())
+  approvedAt DateTime?
+  approvedBy Int?
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  MATERNITY
+  PATERNITY
+  UNPAID
+  EMERGENCY
+  COMPASSIONATE
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model Attendance {
+  id          Int      @id @default(autoincrement())
+  date        DateTime
+  checkIn     DateTime
+  checkOut    DateTime?
+  hoursWorked Float?
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  employeeId  Int
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Payroll {
+  id          Int      @id @default(autoincrement())
+  month       Int
+  year        Int
+  basicSalary Float
+  allowances  Float    @default(0)
+  deductions  Float    @default(0)
+  epfAmount   Float
+  socsoAmount Float
+  taxAmount   Float
+  netSalary   Float
+  employee    Employee @relation(fields: [employeeId], references: [id])
+  employeeId  Int
+  paidAt      DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([employeeId, month, year])
+}
