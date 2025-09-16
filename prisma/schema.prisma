@@ -145,6 +145,14 @@ enum ApplicationStatus {
 }
 
 enum AIAgentType {
+  COORDINATOR
+  COMPLIANCE
+  IR
+  ER
+  CB
+  TA
+  LD
+  PERFORMANCE
   RESUME_PARSER
   CANDIDATE_MATCHER
   CHATBOT

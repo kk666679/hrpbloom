@@ -1,13 +1,3 @@
-export const runtime = "nodejs"
-
-import NextAuth from "next-auth"
-import { authOptions } from "@/lib/auth-options"
-
-// Attach NextAuth to routes
-const handler = NextAuth(authOptions)
-export { handler as GET, handler as POST }
-
-
 // Simple authentication utilities
 export interface User {
   id: string
@@ -24,7 +14,7 @@ export const DEMO_USERS: User[] = [
   { id: "3", email: "employee@company.com", name: "John Doe", role: "employee", companyId: "1" },
 ]
 
-export function validateCredentials(email: string, password: string): User | null {
+export async function validateCredentials(email: string, password: string): Promise<User | null> {
   if (password === "demo123") {
     return DEMO_USERS.find((user) => user.email === email) || null
   }

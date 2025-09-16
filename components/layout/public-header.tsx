@@ -26,7 +26,7 @@ export function PublicHeader() {
         <div className="flex lg:flex-1">
           <Link href="/" className="-m-1.5 p-1.5 flex items-center">
             <Building className="h-8 w-8 text-primary" />
-            <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">HRMS Malaysia</span>
+            <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">HRPBLooM</span>
           </Link>
         </div>
         <div className="flex lg:hidden">

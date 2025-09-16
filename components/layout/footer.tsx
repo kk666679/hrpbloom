@@ -36,7 +36,7 @@ export function Footer() {
           <div className="space-y-8">
             <div className="flex items-center">
               <Building className="h-8 w-8 text-primary" />
-              <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">HRMS Malaysia</span>
+              <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">HRPBLooM</span>
             </div>
             <p className="text-sm leading-6 text-gray-600 dark:text-gray-300">
               Complete Human Resource Management System designed for Malaysian businesses with built-in EPF, SOCSO, and tax compliance.
@@ -44,11 +44,11 @@ export function Footer() {
             <div className="space-y-2">
               <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                 <Mail className="h-4 w-4 mr-2" />
-                info@hrms-malaysia.com
+                admin@hrpbloom.com
               </div>
               <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                 <Phone className="h-4 w-4 mr-2" />
-                +60 3-1234 5678
+                +60 12-314 3082
               </div>
               <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                 <MapPin className="h-4 w-4 mr-2" />
@@ -93,7 +93,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <p className="text-sm leading-5 text-gray-600 dark:text-gray-300">
-            &copy; 2024 HRMS Malaysia. All rights reserved.
+            &copy; 2025 HRPBLOOM Malaysia. All rights reserved.
           </p>
           <div className="flex space-x-6">
             {navigation.social.map((item) => (

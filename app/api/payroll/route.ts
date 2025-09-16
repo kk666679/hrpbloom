@@ -1,3 +1,4 @@
+export const runtime = "nodejs"
 import { type NextRequest, NextResponse } from "next/server"
 import { getAuthToken } from "@/lib/auth"
 import { prisma } from "@/lib/db"

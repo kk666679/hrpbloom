@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
-import { verifyToken } from "./lib/auth-extended"
 
-// Define protected routes
 const protectedRoutes = [
   "/dashboard",
   "/employees",
@@ -13,62 +11,73 @@ const protectedRoutes = [
   "/employee-portal",
 ]
 
-// Define public routes that don't require authentication
 const publicRoutes = ["/login", "/signup", "/", "/api/auth/login", "/api/auth/logout"]
 
-export function middleware(request: NextRequest) {
+// Minimal JWT verification (Edge runtime safe)
+async function verifyJwt(token: string): Promise<any | null> {
+  try {
+    const encoder = new TextEncoder()
+    const key = await crypto.subtle.importKey(
+      "raw",
+      encoder.encode(process.env.JWT_SECRET || "demo-secret"),
+      { name: "HMAC", hash: "SHA-256" },
+      false,
+      ["verify"]
+    )
+
+    const [header, payload, signature] = token.split(".")
+    if (!header || !payload || !signature) return null
+
+    const data = `${header}.${payload}`
+    const signatureBytes = Uint8Array.from(atob(signature.replace(/-/g, "+").replace(/_/g, "/")), c => c.charCodeAt(0))
+
+    const valid = await crypto.subtle.verify(
+      "HMAC",
+      key,
+      signatureBytes,
+      new TextEncoder().encode(data)
+    )
+
+    if (!valid) return null
+
+    return JSON.parse(atob(payload))
+  } catch {
+    return null
+  }
+}
+
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Allow public routes
   if (publicRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next()
   }
 
-  // Check if route is protected
   const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
-
   if (isProtectedRoute) {
-    // Get token from cookie
     const token = request.cookies.get("auth-token")?.value
 
     if (!token) {
-      // Redirect to login if no token
       return NextResponse.redirect(new URL("/login", request.url))
     }
 
-    // Verify token
-    const user = verifyToken(token)
+    const user = await verifyJwt(token)
     if (!user) {
-      // Redirect to login if token is invalid
       const response = NextResponse.redirect(new URL("/login", request.url))
       response.cookies.delete("auth-token")
       return response
     }
 
-    // Add user info to headers for API routes
     const requestHeaders = new Headers(request.headers)
-    requestHeaders.set("x-user-id", user.id.toString())
-    requestHeaders.set("x-user-role", user.role)
+    requestHeaders.set("x-user-id", user.id?.toString() ?? "")
+    requestHeaders.set("x-user-role", user.role ?? "")
 
-    return NextResponse.next({
-      request: {
-        headers: requestHeaders,
-      },
-    })
+    return NextResponse.next({ request: { headers: requestHeaders } })
   }
 
   return NextResponse.next()
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api (API routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     */
-    "/((?!api|_next/static|_next/image|favicon.ico).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
 }
