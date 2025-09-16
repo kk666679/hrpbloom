@@ -1,13 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getServerSession } from "next-auth/next"
-import { authOptions } from "@/lib/auth"
+import { getAuthToken } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { calculateMalaysianPayroll } from "@/lib/malaysian-compliance"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session) {
+    const token = request.headers.get("authorization")?.replace("Bearer ", "")
+    const user = token ? getAuthToken() : null
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -22,9 +22,9 @@ export async function GET(request: NextRequest) {
     const where: any = {}
 
     // If not admin/HR, only show own payroll
-    if (!["ADMIN", "HR"].includes(session.user.role)) {
+    if (!["admin", "hr"].includes(user.role)) {
       const employee = await prisma.employee.findUnique({
-        where: { email: session.user.email },
+        where: { email: user.email },
       })
       if (employee) {
         where.employeeId = employee.id
@@ -82,13 +82,14 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || !["ADMIN", "HR"].includes(session.user.role)) {
+    const token = request.headers.get("authorization")?.replace("Bearer ", "")
+    const user = token ? getAuthToken() : null
+    if (!user || !["admin", "hr"].includes(user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const body = await request.json()
-    const { employeeId, month, year, allowances = 0, deductions = 0 } = body
+    const { employeeId, month, year, allowances = 0, deductions = 0, tabungHajiOptIn = false, state } = body
 
     // Check if payroll already exists for this employee and period
     const existingPayroll = await prisma.payroll.findUnique({
@@ -119,6 +120,8 @@ export async function POST(request: NextRequest) {
       basicSalary: employee.salary,
       allowances: Number.parseFloat(allowances),
       deductions: Number.parseFloat(deductions),
+      tabungHajiOptIn,
+      state,
     })
 
     // Create payroll record
@@ -132,7 +135,10 @@ export async function POST(request: NextRequest) {
         deductions: Number.parseFloat(deductions),
         epfAmount: payrollCalculation.epfEmployee,
         socsoAmount: payrollCalculation.socsoEmployee,
+        eisAmount: payrollCalculation.eisAmount,
+        tabungHajiAmount: payrollCalculation.tabungHajiAmount,
         taxAmount: payrollCalculation.taxAmount,
+        zakatAmount: payrollCalculation.zakatAmount,
         netSalary: payrollCalculation.netSalary,
       },
       include: {

@@ -15,6 +15,7 @@ model Company {
   contactNo      String
   email          String
   employees      Employee[]
+  jobs           Job[]
   createdAt      DateTime   @default(now())
   updatedAt      DateTime   @updatedAt
 }
@@ -42,12 +43,24 @@ model Employee {
   leaveBalance Int            @default(21)
   password     String
   role         UserRole       @default(EMPLOYEE)
-  documents    Document[]
-  leaves       Leave[]
-  attendances  Attendance[]
-  payrolls     Payroll[]
-  company      Company        @relation(fields: [companyId], references: [id])
-  companyId    Int
+  // Employer fields
+  employerCompanyName String?
+  employerDescription String?
+  employerWebsite     String?
+  // Job seeker fields
+  skills             String?
+  experienceYears    Int?
+  documents          Document[]
+  leaves             Leave[]
+  attendances        Attendance[]
+  payrolls           Payroll[]
+  jobs               Job[]
+  applications       JobApplication[]
+  resumes            Resume[]
+  conversations      Conversation[]
+  recommendations    Recommendation[]
+  company            Company        @relation(fields: [companyId], references: [id])
+  companyId          Int
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
 }
@@ -65,6 +78,8 @@ enum UserRole {
   HR
   MANAGER
   EMPLOYEE
+  EMPLOYER
+  JOB_SEEKER
 }
 
 model Document {
@@ -109,6 +124,33 @@ enum LeaveStatus {
   CANCELLED
 }
 
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  FREELANCE
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+  FILLED
+}
+
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  ACCEPTED
+  REJECTED
+}
+
+enum AIAgentType {
+  RESUME_PARSER
+  CANDIDATE_MATCHER
+  CHATBOT
+  RECOMMENDER
+}
+
 model Attendance {
   id          Int      @id @default(autoincrement())
   date        DateTime
@@ -122,21 +164,114 @@ model Attendance {
 }
 
 model Payroll {
-  id          Int      @id @default(autoincrement())
-  month       Int
-  year        Int
-  basicSalary Float
-  allowances  Float    @default(0)
-  deductions  Float    @default(0)
-  epfAmount   Float
-  socsoAmount Float
-  taxAmount   Float
-  netSalary   Float
-  employee    Employee @relation(fields: [employeeId], references: [id])
-  employeeId  Int
-  paidAt      DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                Int      @id @default(autoincrement())
+  month             Int
+  year              Int
+  basicSalary       Float
+  allowances        Float    @default(0)
+  deductions        Float    @default(0)
+  epfAmount         Float
+  socsoAmount       Float
+  eisAmount         Float    @default(0) // Employment Insurance System
+  tabungHajiAmount  Float    @default(0) // Tabung Haji contribution
+  taxAmount         Float
+  zakatAmount       Float    @default(0) // Zakat contribution
+  netSalary         Float
+  employee          Employee @relation(fields: [employeeId], references: [id])
+  employeeId        Int
+  paidAt            DateTime?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   @@unique([employeeId, month, year])
+}
+
+model Job {
+  id             Int           @id @default(autoincrement())
+  title          String
+  description    String
+  requirements   String
+  location       String
+  salaryMin      Float?
+  salaryMax      Float?
+  type           JobType
+  status         JobStatus     @default(OPEN)
+  employer       Employee      @relation(fields: [employerId], references: [id])
+  employerId     Int
+  company        Company?      @relation(fields: [companyId], references: [id])
+  companyId      Int?
+  applications   JobApplication[]
+  recommendations Recommendation[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+}
+
+model JobApplication {
+  id          Int               @id @default(autoincrement())
+  job         Job               @relation(fields: [jobId], references: [id])
+  jobId       Int
+  applicant   Employee          @relation(fields: [applicantId], references: [id])
+  applicantId Int
+  resume      Resume            @relation(fields: [resumeId], references: [id])
+  resumeId    Int
+  coverLetter String?
+  status      ApplicationStatus @default(PENDING)
+  appliedAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+}
+
+model Resume {
+  id           Int             @id @default(autoincrement())
+  employee     Employee        @relation(fields: [employeeId], references: [id])
+  employeeId   Int
+  fileUrl      String
+  fileName     String
+  parsedData   Json?
+  applications JobApplication[]
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model AIAgent {
+  id           Int           @id @default(autoincrement())
+  name         String
+  type         AIAgentType
+  config       Json
+  isActive     Boolean       @default(true)
+  conversations Conversation[]
+  logs         AILog[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Conversation {
+  id        Int      @id @default(autoincrement())
+  user      Employee @relation(fields: [userId], references: [id])
+  userId    Int
+  agent     AIAgent  @relation(fields: [agentId], references: [id])
+  agentId   Int
+  messages  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Recommendation {
+  id        Int      @id @default(autoincrement())
+  user      Employee @relation(fields: [userId], references: [id])
+  userId    Int
+  job       Job      @relation(fields: [jobId], references: [id])
+  jobId     Int
+  score     Float
+  reasons   Json
+  createdAt DateTime @default(now())
+}
+
+model AILog {
+  id        Int      @id @default(autoincrement())
+  agent     AIAgent  @relation(fields: [agentId], references: [id])
+  agentId   Int
+  action    String
+  input     Json
+  output    Json
+  timestamp DateTime @default(now())
 }

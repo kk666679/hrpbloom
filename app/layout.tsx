@@ -3,6 +3,7 @@ import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
 import { AuthProvider } from "@/hooks/use-auth"
+import { Providers } from "./providers"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -28,7 +29,9 @@ html {
         `}</style>
       </head>
       <body className="dark">
-        <AuthProvider>{children}</AuthProvider>
+        <Providers>
+          <AuthProvider>{children}</AuthProvider>
+        </Providers>
       </body>
     </html>
   )
