@@ -34,28 +34,31 @@ export function Footer() {
         <div className="xl:grid xl:grid-cols-3 xl:gap-8">
           {/* Company Info */}
           <div className="space-y-8">
-            <div className="flex items-center">
-              <Building className="h-8 w-8 text-primary" />
-              <span className="ml-2 text-xl font-bold text-gray-900 dark:text-white">HRPBLooM</span>
+          <div className="flex items-center">
+            <img
+              src="https://oq1gkkfo4q0hj5xi.public.blob.vercel-storage.com/images/Sleek%20Flat%20Design%20Logo%20in%20Blue%20and%20Green_20250918_023037_0000.svg"
+              alt="HRPBLooM Logo"
+              className="h-8 w-8"
+            />
+          </div>
+          <p className="text-sm leading-6 text-gray-600 dark:text-gray-300">
+            Complete Human Resource Management System designed for Malaysian businesses with built-in EPF, SOCSO, and tax compliance.
+          </p>
+          <div className="space-y-2">
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+              <Mail className="h-4 w-4 mr-2" />
+              admin@hrpbloom.com
             </div>
-            <p className="text-sm leading-6 text-gray-600 dark:text-gray-300">
-              Complete Human Resource Management System designed for Malaysian businesses with built-in EPF, SOCSO, and tax compliance.
-            </p>
-            <div className="space-y-2">
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                <Mail className="h-4 w-4 mr-2" />
-                admin@hrpbloom.com
-              </div>
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                <Phone className="h-4 w-4 mr-2" />
-                +60 12-314 3082
-              </div>
-              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
-                <MapPin className="h-4 w-4 mr-2" />
-                Kuala Lumpur, Malaysia
-              </div>
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+              <Phone className="h-4 w-4 mr-2" />
+              +60 12-314 3082
+            </div>
+            <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
+              <MapPin className="h-4 w-4 mr-2" />
+              Kuala Lumpur, Malaysia
             </div>
           </div>
+        </div>
 
           {/* Navigation */}
           <div className="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
@@ -93,7 +96,7 @@ export function Footer() {
         {/* Bottom */}
         <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
           <p className="text-sm leading-5 text-gray-600 dark:text-gray-300">
-            &copy; 2025 HRPBLOOM Malaysia. All rights reserved.
+            &copy; 2025 HRPBLooM Malaysia. All rights reserved.
           </p>
           <div className="flex space-x-6">
             {navigation.social.map((item) => (

@@ -4,9 +4,10 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
+    const params = await context.params
+    const session = await getServerSession(authOptions) as any
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -14,7 +15,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     const employee = await prisma.employee.findUnique({
       where: {
         id: Number.parseInt(params.id),
-        companyId: Number.parseInt(session.user.companyId),
+        companyId: Number.parseInt((session.user as any).companyId),
       },
       include: {
         company: true,
@@ -48,10 +49,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || !["ADMIN", "HR"].includes(session.user.role)) {
+    const params = await context.params
+    const session = await getServerSession(authOptions) as any
+    if (!session || !["ADMIN", "HR"].includes((session.user as any).role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -80,7 +82,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const employee = await prisma.employee.update({
       where: {
         id: Number.parseInt(params.id),
-        companyId: Number.parseInt(session.user.companyId),
+        companyId: Number.parseInt((session.user as any).companyId),
       },
       data: {
         firstName,
@@ -114,17 +116,18 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== "ADMIN") {
+    const params = await context.params
+    const session = await getServerSession(authOptions) as any
+    if (!session || (session.user as any).role !== "ADMIN") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     await prisma.employee.delete({
       where: {
         id: Number.parseInt(params.id),
-        companyId: Number.parseInt(session.user.companyId),
+        companyId: Number.parseInt((session.user as any).companyId),
       },
     })
 

@@ -1,23 +1,21 @@
-"use client"
+pour"use client"
 
 import type React from "react"
 import { useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
+import { signIn } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useAuth } from "@/hooks/use-auth"
-import { validateCredentials, setAuthToken } from "@/lib/auth"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-  const { login } = useAuth()
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -25,14 +23,16 @@ export default function LoginPage() {
     setIsLoading(true)
     setError("")
 
-    const user = validateCredentials(email, password)
+    const result = await signIn("credentials", {
+      email,
+      password,
+      redirect: false,
+    })
 
-    if (user) {
-      setAuthToken(user)
-      login(user)
-      router.push("/dashboard")
+    if (result?.error) {
+      setError("Invalid credentials. Please check your email and password.")
     } else {
-      setError("Invalid credentials. Use demo123 as password for any demo email.")
+      router.push("/dashboard")
     }
 
     setIsLoading(false)
@@ -66,17 +66,12 @@ export default function LoginPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <Link href="/" className="inline-block mb-6">
-            <div className="flex items-center justify-center space-x-2">
-              <svg
-                fill="currentColor"
-                viewBox="0 0 147 70"
-                xmlns="http://www.w3.org/2000/svg"
-                aria-hidden="true"
-                className="text-[#e78a53] rounded-full size-8 w-8"
-              >
-                <path d="M56 50.2031V14H70V60.1562C70 65.5928 65.5928 70 60.1562 70C57.5605 70 54.9982 68.9992 53.1562 67.1573L0 14H19.7969L56 50.2031Z"></path>
-                <path d="M147 56H133V23.9531L100.953 56H133V70H96.6875C85.8144 70 77 61.1856 77 50.3125V14H91V46.1562L123.156 14H91V0H127.312C138.186 0 147 8.81439 147 19.6875V56Z"></path>
-              </svg>
+            <div className="flex items-center justify-center">
+              <img
+                src="https://oq1gkkfo4q0hj5xi.public.blob.vercel-storage.com/images/Sleek%20Flat%20Design%20Logo%20in%20Blue%20and%20Green_20250918_023037_0000.svg"
+                alt="HRPBLooM Logo"
+                className="w-8 h-8"
+              />
             </div>
           </Link>
           <h1 className="text-3xl font-bold text-white mb-2">Welcome back</h1>

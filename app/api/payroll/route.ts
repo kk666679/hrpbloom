@@ -1,6 +1,6 @@
 export const runtime = "nodejs"
 import { type NextRequest, NextResponse } from "next/server"
-import { getAuthToken } from "@/lib/auth"
+import { getAuthToken } from "@/lib/auth-utils"
 import { prisma } from "@/lib/db"
 import { calculateMalaysianPayroll } from "@/lib/malaysian-compliance"
 

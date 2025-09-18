@@ -248,7 +248,7 @@ export default function Services() {
               </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="text-lg px-8 py-3 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary">
-              <Link href="tel:+60312345678">Call Now</Link>
+              <Link href="tel:+6 012-314 3082">Call Now</Link>
             </Button>
           </div>
         </div>

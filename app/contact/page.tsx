@@ -94,8 +94,8 @@ export default function Contact() {
                     <Mail className="h-6 w-6 text-primary mr-3" />
                     <h3 className="text-lg font-semibold">Email Us</h3>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300 mb-2">info@hrms-malaysia.com</p>
-                  <p className="text-gray-600 dark:text-gray-300">support@hrms-malaysia.com</p>
+                  <p className="text-gray-600 dark:text-gray-300 mb-2">info@hrpbloom.com</p>
+                  <p className="text-gray-600 dark:text-gray-300">support@hrpbloom.com</p>
                 </CardContent>
               </Card>
 
@@ -105,7 +105,7 @@ export default function Contact() {
                     <Phone className="h-6 w-6 text-primary mr-3" />
                     <h3 className="text-lg font-semibold">Call Us</h3>
                   </div>
-                  <p className="text-gray-600 dark:text-gray-300 mb-2">+60 3-1234 5678</p>
+                  <p className="text-gray-600 dark:text-gray-300 mb-2">+60 12 314 3082</p>
                   <p className="text-gray-600 dark:text-gray-300">Mon-Fri: 9AM-6PM MYT</p>
                 </CardContent>
               </Card>
@@ -118,10 +118,10 @@ export default function Contact() {
                   </div>
                   <p className="text-gray-600 dark:text-gray-300 mb-2">
                     Level 15, Tower A<br />
-                    Vertical Business Suite<br />
-                    Avenue 3, Bangsar South<br />
-                    No. 8, Jalan Kerinchi<br />
-                    59200 Kuala Lumpur, Malaysia
+                    Perdana View<br />
+                    Jalan PJU 8/1<br />
+                    Petaling Jaya<br />
+                    47820 Kuala Lumpur, Malaysia
                   </p>
                 </CardContent>
               </Card>

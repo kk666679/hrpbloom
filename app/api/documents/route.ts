@@ -6,7 +6,7 @@ import { prisma } from "@/lib/db"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions) as any
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -18,9 +18,9 @@ export async function GET(request: NextRequest) {
     const where: any = {}
 
     // If not admin/HR, only show own documents
-    if (!["ADMIN", "HR"].includes(session.user.role)) {
+    if (!["ADMIN", "HR"].includes((session.user as any).role)) {
       const employee = await prisma.employee.findUnique({
-        where: { email: session.user.email },
+        where: { email: (session.user as any).email },
       })
       if (employee) {
         where.employeeId = employee.id
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions) as any
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -75,9 +75,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if user can upload documents for this employee
-    if (!["ADMIN", "HR"].includes(session.user.role)) {
+    if (!["ADMIN", "HR"].includes((session.user as any).role)) {
       const employee = await prisma.employee.findUnique({
-        where: { email: session.user.email },
+        where: { email: (session.user as any).email },
       })
       if (!employee || employee.id !== Number.parseInt(employeeId)) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })

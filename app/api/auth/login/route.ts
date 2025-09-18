@@ -1,7 +1,7 @@
 export const runtime = "nodejs"
 import { type NextRequest, NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
-import { generateToken } from "@/lib/auth"
+import { generateToken } from "@/lib/auth-extended"
 
 const prisma = new PrismaClient()
 

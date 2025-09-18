@@ -59,6 +59,9 @@ model Employee {
   resumes            Resume[]
   conversations      Conversation[]
   recommendations    Recommendation[]
+  irCases            IRCase[]       @relation("EmployeeIRCases")
+  irCaseActions      IRCaseAction[] @relation("EmployeeIRCaseActions")
+  irCaseDocuments    IRCaseDocument[] @relation("EmployeeIRCaseDocuments")
   company            Company        @relation(fields: [companyId], references: [id])
   companyId          Int
   createdAt    DateTime       @default(now())
@@ -200,6 +203,7 @@ model Job {
   description    String
   requirements   String
   location       String
+  department     String?
   salaryMin      Float?
   salaryMax      Float?
   type           JobType
@@ -282,4 +286,68 @@ model AILog {
   input     Json
   output    Json
   timestamp DateTime @default(now())
+}
+
+model IRCase {
+  id            Int         @id @default(autoincrement())
+  caseNumber    String      @unique
+  employee      Employee    @relation(fields: [employeeId], references: [id], name: "EmployeeIRCases")
+  employeeId    Int
+  type          IRCaseType
+  status        IRCaseStatus @default(OPEN)
+  description   String
+  allegations   Json        // Array of allegations
+  riskLevel     RiskLevel   @default(LOW)
+  assignedTo    Int?        // HR/IR officer ID
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  actions       IRCaseAction[]
+  documents     IRCaseDocument[]
+}
+
+enum IRCaseType {
+  DISPUTE
+  TERMINATION
+  HARASSMENT
+  UNFAIR_DISMISSAL
+  UNION_MATTERS
+  COMPLIANCE_VIOLATION
+}
+
+enum IRCaseStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+  CLOSED
+  ESCALATED
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+model IRCaseAction {
+  id        Int      @id @default(autoincrement())
+  case      IRCase   @relation(fields: [caseId], references: [id])
+  caseId    Int
+  action    String
+  performedBy Int    // Employee ID who performed the action
+  performedByEmployee Employee @relation(fields: [performedBy], references: [id], name: "EmployeeIRCaseActions")
+  notes     String?
+  timestamp DateTime @default(now())
+}
+
+model IRCaseDocument {
+  id         Int      @id @default(autoincrement())
+  case       IRCase   @relation(fields: [caseId], references: [id])
+  caseId     Int
+  name       String
+  type       String
+  url        String
+  uploadedBy Int      // Employee ID who uploaded
+  uploadedByEmployee Employee @relation(fields: [uploadedBy], references: [id], name: "EmployeeIRCaseDocuments")
+  uploadedAt DateTime @default(now())
 }

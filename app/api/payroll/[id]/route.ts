@@ -4,9 +4,10 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
+    const params = await context.params
+    const session = await getServerSession(authOptions) as any
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -27,9 +28,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Check if user can access this payroll
-    if (!["ADMIN", "HR"].includes(session.user.role)) {
+    if (!["ADMIN", "HR"].includes((session.user as any).role)) {
       const employee = await prisma.employee.findUnique({
-        where: { email: session.user.email },
+        where: { email: (session.user as any).email },
       })
       if (!employee || employee.id !== payroll.employeeId) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -43,10 +44,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
+    const params = await context.params
     const session = await getServerSession(authOptions)
-    if (!session || !["ADMIN", "HR"].includes(session.user.role)) {
+    if (!session || !["ADMIN", "HR"].includes((session.user as any).role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

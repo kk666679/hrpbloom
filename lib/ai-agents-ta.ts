@@ -236,4 +236,52 @@ export class TAAgent extends AIBaseAgent {
       completedAt: new Date()
     }
   }
+
+  // Public method to match a candidate to a job
+  async matchCandidateToJob(candidate: any, job: any): Promise<{ score: number; reasons: string[] }> {
+    // Simple matching logic for now
+    const candidateSkills = candidate.skills ? candidate.skills.toLowerCase().split(',').map((s: string) => s.trim()) : [];
+    const jobRequirements = job.requirements ? job.requirements.toLowerCase() : '';
+    const jobDescription = job.description ? job.description.toLowerCase() : '';
+
+    let score = 0;
+    const reasons: string[] = [];
+
+    // Check skills match
+    const matchingSkills = candidateSkills.filter((skill: string) =>
+      jobRequirements.includes(skill) || jobDescription.includes(skill)
+    );
+
+    if (matchingSkills.length > 0) {
+      score += matchingSkills.length * 20; // 20 points per matching skill
+      reasons.push(`Matching skills: ${matchingSkills.join(', ')}`);
+    }
+
+    // Check experience
+    if (candidate.experienceYears && candidate.experienceYears > 0) {
+      score += Math.min(candidate.experienceYears * 5, 30); // Up to 30 points for experience
+      reasons.push(`Experience: ${candidate.experienceYears} years`);
+    }
+
+    // Location match
+    if (candidate.address && job.location && candidate.address.toLowerCase().includes(job.location.toLowerCase())) {
+      score += 10;
+      reasons.push('Location match');
+    }
+
+    // Department match
+    if (candidate.department && job.department && candidate.department.toLowerCase() === job.department.toLowerCase()) {
+      score += 15;
+      reasons.push('Department match');
+    }
+
+    // Cap score at 100
+    score = Math.min(score, 100);
+
+    if (score === 0) {
+      reasons.push('No significant matches found');
+    }
+
+    return { score, reasons };
+  }
 }

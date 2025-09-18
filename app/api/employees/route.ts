@@ -21,7 +21,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit
 
     const where: any = {
-      companyId: Number.parseInt(session.user.companyId),
+      companyId: Number.parseInt((session as any).user.companyId),
     }
 
     if (search) {
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session || !["ADMIN", "HR"].includes(session.user.role)) {
+    if (!session || !["ADMIN", "HR"].includes((session as any).user.role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 

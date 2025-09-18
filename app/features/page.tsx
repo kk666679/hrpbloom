@@ -1,4 +1,5 @@
 import Link from "next/link"
+import { Navbar } from "@/components/Navbar"
 import { PublicHeader } from "@/components/layout/public-header"
 import { Footer } from "@/components/layout/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -98,6 +99,7 @@ export default function Features() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
+      <Navbar />
       <PublicHeader />
 
       {/* Hero Section */}

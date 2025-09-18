@@ -134,9 +134,9 @@ export default function About() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               {
-                name: "Dr. Ahmad Razak",
+                name: "Pn. Aziyah Salwa",
                 position: "CEO & Co-Founder",
-                bio: "Former HR Director with 15+ years experience in Malaysian employment law and HR technology.",
+                bio: "Former HR Practioner with 30+ years experience in Malaysian employment law and HR technology.",
                 image: "/placeholder-user.jpg"
               },
               {

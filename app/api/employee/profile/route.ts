@@ -6,14 +6,14 @@ import { prisma } from "@/lib/db"
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions) as any
 
     if (!session?.user?.email) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const employee = await prisma.employee.findUnique({
-      where: { email: session.user.email },
+      where: { email: (session.user as any).email },
       include: {
         leaves: {
           orderBy: { appliedAt: "desc" },

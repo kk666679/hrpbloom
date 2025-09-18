@@ -6,10 +6,11 @@
     "build": "next build",
     "dev": "next dev",
     "lint": "next lint",
-    "start": "next start"
+    "start": "next start",
+    "test": "vitest"
   },
   "dependencies": {
-    "@auth/core": "latest",
+    "@auth/core": "^0.40.0",
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "latest",
     "@prisma/client": "latest",
@@ -53,7 +54,7 @@
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
     "next": "^15.5.3",
-    "next-auth": "^4.24.11",
+    "next-auth": "^4.24.7",
     "next-themes": "^0.4.4",
     "nodemailer": "latest",
     "openai": "^5.20.3",
@@ -69,15 +70,22 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
+    "vercel": "^48.0.2",
     "zod": "latest"
   },
   "devDependencies": {
     "@types/node": "^22",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/supertest": "^6.0.3",
+    "eslint": "^9.35.0",
+    "eslint-config-next": "15.5.3",
+    "playwright": "^1.55.0",
     "postcss": "^8.5",
+    "supertest": "^7.1.4",
     "tailwindcss": "^3.4.17",
     "typescript": "^5",
+    "vitest": "^3.2.4",
     "webpack": "^5.101.3",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"

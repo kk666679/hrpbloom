@@ -5,7 +5,7 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import DashboardLayout from "@/components/layout/dashboard-layout"
+import { DashboardLayout } from "@/components/layout/dashboard-layout"
 
 interface EmployeeData {
   id: number

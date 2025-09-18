@@ -4,9 +4,10 @@ import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 
-export async function GET(request: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
+    const params = await context.params
+    const session = await getServerSession(authOptions) as any
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -27,9 +28,9 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Check if user can access this leave
-    if (!["ADMIN", "HR", "MANAGER"].includes(session.user.role)) {
+    if (!["ADMIN", "HR", "MANAGER"].includes((session.user as any).role)) {
       const employee = await prisma.employee.findUnique({
-        where: { email: session.user.email },
+        where: { email: (session.user as any).email },
       })
       if (!employee || employee.id !== leave.employeeId) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
@@ -43,10 +44,11 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || !["ADMIN", "HR", "MANAGER"].includes(session.user.role)) {
+    const params = await context.params
+    const session = await getServerSession(authOptions) as any
+    if (!session || !["ADMIN", "HR", "MANAGER"].includes((session.user as any).role)) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
@@ -64,7 +66,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     // Get approver's employee record
     const approver = await prisma.employee.findUnique({
-      where: { email: session.user.email },
+      where: { email: (session.user as any).email },
     })
 
     if (!approver) {
@@ -117,9 +119,10 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
   }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(request: NextRequest, context: { params: Promise<{ id: string }> }) {
   try {
-    const session = await getServerSession(authOptions)
+    const params = await context.params
+    const session = await getServerSession(authOptions) as any
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
@@ -133,9 +136,9 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Only allow deletion by the applicant or admin/HR
-    if (!["ADMIN", "HR"].includes(session.user.role)) {
+    if (!["ADMIN", "HR"].includes((session.user as any).role)) {
       const employee = await prisma.employee.findUnique({
-        where: { email: session.user.email },
+        where: { email: (session.user as any).email },
       })
       if (!employee || employee.id !== leave.employeeId) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
