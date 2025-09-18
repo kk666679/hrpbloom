@@ -3,9 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getUserFromRequest } from '@/lib/auth'
 import { agentRegistry, createTask, createContext } from '@/lib/ai-agents'
 import { AgentTaskType, TaskPriority } from '@/types/ai-agents'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/db'
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,7 +34,7 @@ export async function POST(request: NextRequest) {
       // Create IR case in database
       const caseNumber = `IR-${Date.now()}-${Math.random().toString(36).substr(2, 6).toUpperCase()}`
 
-      const irCase = await (prisma as any).iRCase.create({
+      const irCase = await prisma.iRCase.create({
         data: {
           caseNumber,
           employeeId: parseInt(employeeId),
@@ -44,13 +42,13 @@ export async function POST(request: NextRequest) {
           description,
           allegations: allegations || [],
           riskLevel: riskLevel || 'LOW',
-          assignedTo: user.role === 'hr' ? parseInt(user.id) : null
+          assignedTo: user.role.toLowerCase() === 'hr' ? parseInt(user.id) : null
         }
       })
 
       // Create task for dispute prediction
       const task = createTask(AgentTaskType.DISPUTE_PREDICT, {
-        caseId: irCase.id,
+        caseId: irCase?.id,
         caseNumber,
         employeeId: parseInt(employeeId),
         type,
@@ -60,7 +58,7 @@ export async function POST(request: NextRequest) {
       }, {
         priority: TaskPriority.HIGH,
         userId: parseInt(user.id),
-        metadata: { source: 'ir_api', caseId: irCase.id }
+        metadata: { source: 'ir_api', caseId: irCase?.id }
       })
 
       // Create context

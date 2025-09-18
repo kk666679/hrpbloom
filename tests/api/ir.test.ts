@@ -39,15 +39,15 @@ vi.mock('@/lib/ai-agents', () => ({
   createContext: vi.fn()
 }))
 
-vi.mock('@prisma/client', () => ({
-  PrismaClient: vi.fn(() => ({
+vi.mock('@/lib/db', () => ({
+  prisma: {
     iRCase: {
       create: vi.fn(),
       update: vi.fn(),
       findMany: vi.fn(),
       count: vi.fn()
     }
-  }))
+  }
 }))
 
 vi.mock('@/lib/auth', () => ({
@@ -86,8 +86,8 @@ describe('IR API', () => {
     mockCreateTask = aiAgents.createTask
     mockCreateContext = aiAgents.createContext
 
-    const prisma = await import('@prisma/client')
-    mockPrisma = new prisma.PrismaClient()
+    const db = await import('@/lib/db')
+    mockPrisma = db.prisma
   })
 
   describe('POST /api/ir', () => {
@@ -131,8 +131,6 @@ describe('IR API', () => {
       })
 
       // Mock Prisma client
-      const prisma = await import('@prisma/client')
-      const mockPrisma = new prisma.PrismaClient()
       mockPrisma.iRCase.create.mockResolvedValue({
         id: 1,
         caseNumber: 'IR-1234567890-ABCDEF',
