@@ -28,7 +28,11 @@ export async function POST(request: NextRequest) {
 
     // Validate task type
     const validTaskTypes = [
-      AgentTaskType.ANALYZE
+      AgentTaskType.SALARY_BENCHMARK,
+      AgentTaskType.BENEFITS_PERSONALIZE,
+      AgentTaskType.PAY_EQUITY_ANALYZE,
+      AgentTaskType.REWARDS_STATEMENT,
+      AgentTaskType.COLA_FORECAST
     ];
 
     if (!validTaskTypes.includes(taskType)) {
@@ -127,7 +131,11 @@ export async function GET(request: NextRequest) {
         }
       ],
       supportedTaskTypes: [
-        AgentTaskType.ANALYZE
+        AgentTaskType.SALARY_BENCHMARK,
+        AgentTaskType.BENEFITS_PERSONALIZE,
+        AgentTaskType.PAY_EQUITY_ANALYZE,
+        AgentTaskType.REWARDS_STATEMENT,
+        AgentTaskType.COLA_FORECAST
       ],
     });
   } catch (error) {

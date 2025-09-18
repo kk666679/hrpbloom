@@ -1,5 +1,7 @@
 "use client";
 
+export { AgentTaskType } from "@/types/ai-agents";
+
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { getAuthToken } from "@/lib/auth";

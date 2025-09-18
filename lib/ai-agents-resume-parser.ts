@@ -1,4 +1,4 @@
-import { AIBaseAgent } from './ai-agents'
+import { AIBaseAgent } from './ai-base-agent'
 import { AgentConfig, AgentTask, AgentResponse, AgentContext, ConversationMessage, AgentTaskType, AIAgentType } from '@/types/ai-agents'
 import { AI_MODELS } from './openai-client'
 

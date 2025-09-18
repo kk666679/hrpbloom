@@ -2,8 +2,13 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { NextRequest } from 'next/server'
 
 // Mock the auth and AI agents
+vi.mock('next-auth/next', () => ({
+  getServerSession: vi.fn()
+}))
+
 vi.mock('@/lib/auth', () => ({
-  getUserFromRequest: vi.fn()
+  getUserFromRequest: vi.fn(),
+  authOptions: {}
 }))
 
 vi.mock('@/lib/ai-agents', () => ({
@@ -31,7 +36,7 @@ vi.mock('@/lib/db', () => ({
 }))
 
 describe('AI Dispatch API', () => {
-  let mockGetUserFromRequest: any
+  let mockGetServerSession: any
   let mockAgentRegistry: any
   let mockCreateTask: any
   let mockCreateContext: any
@@ -42,8 +47,8 @@ describe('AI Dispatch API', () => {
     vi.clearAllMocks()
 
     // Get mock references
-    const auth = await import('@/lib/auth')
-    mockGetUserFromRequest = auth.getUserFromRequest
+    const nextAuth = await import('next-auth/next')
+    mockGetServerSession = nextAuth.getServerSession
 
     const aiAgents = await import('@/lib/ai-agents')
     mockAgentRegistry = aiAgents.agentRegistry
@@ -64,7 +69,7 @@ describe('AI Dispatch API', () => {
 
   describe('POST /api/ai/dispatch', () => {
     it('should return 401 when user is not authenticated', async () => {
-      mockGetUserFromRequest.mockReturnValue(null)
+      mockGetServerSession.mockReturnValue(null)
 
       const { POST } = await import('@/app/api/ai/dispatch/route')
       const request = new NextRequest('http://localhost:3000/api/ai/dispatch', {
@@ -83,12 +88,14 @@ describe('AI Dispatch API', () => {
     })
 
     it('should return 400 when taskType is missing', async () => {
-      mockGetUserFromRequest.mockReturnValue({
-        id: '1',
-        email: 'test@example.com',
-        name: 'Test User',
-        role: 'EMPLOYEE',
-        companyId: '1'
+      mockGetServerSession.mockReturnValue({
+        user: {
+          id: '1',
+          email: 'test@example.com',
+          name: 'Test User',
+          role: 'EMPLOYEE',
+          companyId: '1'
+        }
       })
 
       const { POST } = await import('@/app/api/ai/dispatch/route')
@@ -114,7 +121,9 @@ describe('AI Dispatch API', () => {
         role: 'EMPLOYEE',
         companyId: '1'
       }
-      mockGetUserFromRequest.mockReturnValue(mockUser)
+      mockGetServerSession.mockReturnValue({
+        user: mockUser
+      })
 
       const mockTask = { id: 'task_123', type: 'PAYROLL_VALIDATE' }
       const mockContext = { userId: 1, companyId: 1 }

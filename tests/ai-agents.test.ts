@@ -11,8 +11,11 @@ class MockAgent extends AIBaseAgent {
   async processTask(task: any) {
     return {
       taskId: task.id,
+      agentId: this.config.name,
       success: true,
-      result: { message: 'Mock response' },
+      output: { message: 'Mock response' },
+      processingTime: 0,
+      completedAt: new Date(),
     };
   }
 }
@@ -48,7 +51,7 @@ describe('AI Agent Framework', () => {
       const response = await coordinator.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result).toEqual({ message: 'Mock response' });
+      expect(response.output).toEqual({ message: 'Mock response' });
     });
 
     it('should return error for unregistered task type', async () => {
@@ -94,9 +97,9 @@ describe('AI Agent Framework', () => {
       const response = await complianceAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.payroll).toBeDefined();
-      expect(response.result.validations).toBeDefined();
-      expect(response.result.compliant).toBe(true);
+      expect(response.output.payroll).toBeDefined();
+      expect(response.output.validations).toBeDefined();
+      expect(response.output.compliant).toBe(true);
     });
 
     it('should perform compliance checks', async () => {
@@ -109,9 +112,9 @@ describe('AI Agent Framework', () => {
       const response = await complianceAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.checks).toBeDefined();
-      expect(response.result.overallCompliant).toBe(true);
-      expect(Array.isArray(response.result.recommendations)).toBe(true);
+      expect(response.output.checks).toBeDefined();
+      expect(response.output.overallCompliant).toBe(true);
+      expect(Array.isArray(response.output.recommendations)).toBe(true);
     });
 
     it('should return error for unsupported task type', async () => {
@@ -140,9 +143,9 @@ describe('AI Agent Framework', () => {
       const response = await erAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.sentiment).toBeDefined();
-      expect(response.result.confidence).toBeDefined();
-      expect(Array.isArray(response.result.recommendations)).toBe(true);
+      expect(response.output.sentiment).toBeDefined();
+      expect(response.output.confidence).toBeDefined();
+      expect(Array.isArray(response.output.recommendations)).toBe(true);
     });
 
     it('should handle mediation chat', async () => {
@@ -156,9 +159,9 @@ describe('AI Agent Framework', () => {
       const response = await erAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.response).toBeDefined();
-      expect(response.result.language).toBe('en');
-      expect(Array.isArray(response.result.nextSteps)).toBe(true);
+      expect(response.output.response).toBeDefined();
+      expect(response.output.language).toBe('en');
+      expect(Array.isArray(response.output.nextSteps)).toBe(true);
     });
 
     it('should generate culture dashboard', async () => {
@@ -171,10 +174,10 @@ describe('AI Agent Framework', () => {
       const response = await erAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.engagementScore).toBeDefined();
-      expect(response.result.deiScore).toBeDefined();
-      expect(Array.isArray(response.result.alerts)).toBe(true);
-      expect(Array.isArray(response.result.recommendations)).toBe(true);
+      expect(response.output.engagementScore).toBeDefined();
+      expect(response.output.deiScore).toBeDefined();
+      expect(Array.isArray(response.output.alerts)).toBe(true);
+      expect(Array.isArray(response.output.recommendations)).toBe(true);
     });
 
     it('should predict escalation risk', async () => {
@@ -189,10 +192,10 @@ describe('AI Agent Framework', () => {
       const response = await erAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.riskLevel).toBeDefined();
-      expect(response.result.probability).toBeDefined();
-      expect(Array.isArray(response.result.triggers)).toBe(true);
-      expect(Array.isArray(response.result.preventionActions)).toBe(true);
+      expect(response.output.riskLevel).toBeDefined();
+      expect(response.output.probability).toBeDefined();
+      expect(Array.isArray(response.output.triggers)).toBe(true);
+      expect(Array.isArray(response.output.preventionActions)).toBe(true);
     });
 
     it('should document investigation', async () => {
@@ -206,10 +209,10 @@ describe('AI Agent Framework', () => {
       const response = await erAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.document).toBeDefined();
-      expect(Array.isArray(response.result.sections)).toBe(true);
-      expect(Array.isArray(response.result.compliance)).toBe(true);
-      expect(Array.isArray(response.result.nextActions)).toBe(true);
+      expect(response.output.document).toBeDefined();
+      expect(Array.isArray(response.output.sections)).toBe(true);
+      expect(Array.isArray(response.output.compliance)).toBe(true);
+      expect(Array.isArray(response.output.nextActions)).toBe(true);
     });
 
     it('should return error for unsupported task type', async () => {
@@ -240,9 +243,9 @@ describe('AI Agent Framework', () => {
       const response = await cbAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.benchmarkSalary).toBeDefined();
-      expect(Array.isArray(response.result.range)).toBe(true);
-      expect(Array.isArray(response.result.recommendations)).toBe(true);
+      expect(response.output.benchmarkSalary).toBeDefined();
+      expect(Array.isArray(response.output.range)).toBe(true);
+      expect(Array.isArray(response.output.recommendations)).toBe(true);
     });
 
     it('should personalize benefits', async () => {
@@ -256,9 +259,9 @@ describe('AI Agent Framework', () => {
       const response = await cbAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(Array.isArray(response.result.recommendedBenefits)).toBe(true);
-      expect(response.result.totalValue).toBeDefined();
-      expect(response.result.employeeSatisfaction).toBeDefined();
+      expect(Array.isArray(response.output.recommendedBenefits)).toBe(true);
+      expect(response.output.totalValue).toBeDefined();
+      expect(response.output.employeeSatisfaction).toBeDefined();
     });
 
     it('should analyze pay equity', async () => {
@@ -274,9 +277,9 @@ describe('AI Agent Framework', () => {
       const response = await cbAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.equityScore).toBeDefined();
-      expect(Array.isArray(response.result.disparities)).toBe(true);
-      expect(Array.isArray(response.result.recommendations)).toBe(true);
+      expect(response.output.equityScore).toBeDefined();
+      expect(Array.isArray(response.output.disparities)).toBe(true);
+      expect(Array.isArray(response.output.recommendations)).toBe(true);
     });
 
     it('should generate rewards statement', async () => {
@@ -289,10 +292,10 @@ describe('AI Agent Framework', () => {
       const response = await cbAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.totalValue).toBeDefined();
-      expect(response.result.breakdown).toBeDefined();
-      expect(response.result.pdfUrl).toBeDefined();
-      expect(response.result.portalUrl).toBeDefined();
+      expect(response.output.totalValue).toBeDefined();
+      expect(response.output.breakdown).toBeDefined();
+      expect(response.output.pdfUrl).toBeDefined();
+      expect(response.output.portalUrl).toBeDefined();
     });
 
     it('should forecast COLA', async () => {
@@ -306,9 +309,9 @@ describe('AI Agent Framework', () => {
       const response = await cbAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.forecastedIncrease).toBeDefined();
-      expect(response.result.inflationRate).toBeDefined();
-      expect(response.result.recommendedAdjustment).toBeDefined();
+      expect(response.output.forecastedIncrease).toBeDefined();
+      expect(response.output.inflationRate).toBeDefined();
+      expect(response.output.recommendedAdjustment).toBeDefined();
     });
 
     it('should return error for unsupported task type', async () => {
@@ -337,10 +340,10 @@ describe('AI Agent Framework', () => {
       const response = await taAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.candidateProfile).toBeDefined();
-      expect(Array.isArray(response.result.skills)).toBe(true);
-      expect(Array.isArray(response.result.experience)).toBe(true);
-      expect(response.result.confidence).toBeDefined();
+      expect(response.output.candidateProfile).toBeDefined();
+      expect(Array.isArray(response.output.skills)).toBe(true);
+      expect(Array.isArray(response.output.experience)).toBe(true);
+      expect(response.output.confidence).toBeDefined();
     });
 
     it('should match candidate to job', async () => {
@@ -353,9 +356,9 @@ describe('AI Agent Framework', () => {
       const response = await taAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.matchScore).toBeDefined();
-      expect(response.result.skillMatch).toBeDefined();
-      expect(Array.isArray(response.result.recommendations)).toBe(true);
+      expect(response.output.matchScore).toBeDefined();
+      expect(response.output.skillMatch).toBeDefined();
+      expect(Array.isArray(response.output.recommendations)).toBe(true);
     });
 
     it('should analyze interview performance', async () => {
@@ -369,10 +372,10 @@ describe('AI Agent Framework', () => {
       const response = await taAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.overallScore).toBeDefined();
-      expect(Array.isArray(response.result.strengths)).toBe(true);
-      expect(Array.isArray(response.result.areasForImprovement)).toBe(true);
-      expect(response.result.hiringRecommendation).toBeDefined();
+      expect(response.output.overallScore).toBeDefined();
+      expect(Array.isArray(response.output.strengths)).toBe(true);
+      expect(Array.isArray(response.output.areasForImprovement)).toBe(true);
+      expect(response.output.hiringRecommendation).toBeDefined();
     });
 
     it('should optimize job posting', async () => {
@@ -385,10 +388,10 @@ describe('AI Agent Framework', () => {
       const response = await taAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.optimizedDescription).toBeDefined();
-      expect(Array.isArray(response.result.suggestedKeywords)).toBe(true);
-      expect(response.result.diversityScore).toBeDefined();
-      expect(response.result.attractivenessScore).toBeDefined();
+      expect(response.output.optimizedDescription).toBeDefined();
+      expect(Array.isArray(response.output.suggestedKeywords)).toBe(true);
+      expect(response.output.diversityScore).toBeDefined();
+      expect(response.output.attractivenessScore).toBeDefined();
     });
 
     it('should track application progress', async () => {
@@ -402,10 +405,10 @@ describe('AI Agent Framework', () => {
       const response = await taAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.currentStage).toBeDefined();
-      expect(response.result.timeInStage).toBeDefined();
-      expect(Array.isArray(response.result.nextSteps)).toBe(true);
-      expect(response.result.riskOfDropout).toBeDefined();
+      expect(response.output.currentStage).toBeDefined();
+      expect(response.output.timeInStage).toBeDefined();
+      expect(Array.isArray(response.output.nextSteps)).toBe(true);
+      expect(response.output.riskOfDropout).toBeDefined();
     });
 
     it('should return error for unsupported task type', async () => {
@@ -438,9 +441,9 @@ describe('AI Agent Framework', () => {
       const response = await performanceAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.predictedCompletion).toBeDefined();
-      expect(response.result.riskLevel).toBeDefined();
-      expect(Array.isArray(response.result.recommendations)).toBe(true);
+      expect(response.output.predictedCompletion).toBeDefined();
+      expect(response.output.riskLevel).toBeDefined();
+      expect(Array.isArray(response.output.recommendations)).toBe(true);
     });
 
     it('should analyze 360 feedback', async () => {
@@ -453,10 +456,10 @@ describe('AI Agent Framework', () => {
       const response = await performanceAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.overallScore).toBeDefined();
-      expect(response.result.sentimentBreakdown).toBeDefined();
-      expect(Array.isArray(response.result.strengths)).toBe(true);
-      expect(Array.isArray(response.result.developmentAreas)).toBe(true);
+      expect(response.output.overallScore).toBeDefined();
+      expect(response.output.sentimentBreakdown).toBeDefined();
+      expect(Array.isArray(response.output.strengths)).toBe(true);
+      expect(Array.isArray(response.output.developmentAreas)).toBe(true);
     });
 
     it('should generate performance matrix', async () => {
@@ -470,10 +473,10 @@ describe('AI Agent Framework', () => {
       const response = await performanceAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(Array.isArray(response.result.matrix)).toBe(true);
-      expect(response.result.distribution).toBeDefined();
-      expect(Array.isArray(response.result.highPerformers)).toBe(true);
-      expect(Array.isArray(response.result.recommendations)).toBe(true);
+      expect(Array.isArray(response.output.matrix)).toBe(true);
+      expect(response.output.distribution).toBeDefined();
+      expect(Array.isArray(response.output.highPerformers)).toBe(true);
+      expect(Array.isArray(response.output.recommendations)).toBe(true);
     });
 
     it('should simulate career path', async () => {
@@ -487,10 +490,10 @@ describe('AI Agent Framework', () => {
       const response = await performanceAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(Array.isArray(response.result.baselinePath)).toBe(true);
-      expect(Array.isArray(response.result.scenarioPaths)).toBe(true);
-      expect(Array.isArray(response.result.keyMilestones)).toBe(true);
-      expect(response.result.successProbability).toBeDefined();
+      expect(Array.isArray(response.output.baselinePath)).toBe(true);
+      expect(Array.isArray(response.output.scenarioPaths)).toBe(true);
+      expect(Array.isArray(response.output.keyMilestones)).toBe(true);
+      expect(response.output.successProbability).toBeDefined();
     });
 
     it('should plan succession', async () => {
@@ -504,11 +507,11 @@ describe('AI Agent Framework', () => {
       const response = await performanceAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(Array.isArray(response.result.criticalPositions)).toBe(true);
-      expect(Array.isArray(response.result.readinessLevels)).toBe(true);
-      expect(Array.isArray(response.result.developmentPlans)).toBe(true);
-      expect(Array.isArray(response.result.riskMitigation)).toBe(true);
-      expect(response.result.gaps).toBeDefined();
+      expect(Array.isArray(response.output.criticalPositions)).toBe(true);
+      expect(Array.isArray(response.output.readinessLevels)).toBe(true);
+      expect(Array.isArray(response.output.developmentPlans)).toBe(true);
+      expect(Array.isArray(response.output.riskMitigation)).toBe(true);
+      expect(response.output.gaps).toBeDefined();
     });
 
     it('should return error for unsupported task type', async () => {
@@ -538,10 +541,10 @@ describe('AI Agent Framework', () => {
       const response = await analyticsAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(Array.isArray(response.result.insights)).toBe(true);
-      expect(response.result.predictions).toBeDefined();
-      expect(Array.isArray(response.result.recommendations)).toBe(true);
-      expect(Array.isArray(response.result.alerts)).toBe(true);
+      expect(Array.isArray(response.output.insights)).toBe(true);
+      expect(response.output.predictions).toBeDefined();
+      expect(Array.isArray(response.output.recommendations)).toBe(true);
+      expect(Array.isArray(response.output.alerts)).toBe(true);
     });
 
     it('should predict attrition risk', async () => {
@@ -558,10 +561,10 @@ describe('AI Agent Framework', () => {
       const response = await analyticsAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(Array.isArray(response.result.highRiskEmployees)).toBe(true);
-      expect(Array.isArray(response.result.riskFactors)).toBe(true);
-      expect(Array.isArray(response.result.interventions)).toBe(true);
-      expect(Array.isArray(response.result.retentionStrategies)).toBe(true);
+      expect(Array.isArray(response.output.highRiskEmployees)).toBe(true);
+      expect(Array.isArray(response.output.riskFactors)).toBe(true);
+      expect(Array.isArray(response.output.interventions)).toBe(true);
+      expect(Array.isArray(response.output.retentionStrategies)).toBe(true);
     });
 
     it('should simulate workforce planning', async () => {
@@ -575,11 +578,11 @@ describe('AI Agent Framework', () => {
       const response = await analyticsAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.baselineScenario).toBeDefined();
-      expect(Array.isArray(response.result.alternativeScenarios)).toBe(true);
-      expect(response.result.gapAnalysis).toBeDefined();
-      expect(response.result.hiringNeeds).toBeDefined();
-      expect(response.result.costProjections).toBeDefined();
+      expect(response.output.baselineScenario).toBeDefined();
+      expect(Array.isArray(response.output.alternativeScenarios)).toBe(true);
+      expect(response.output.gapAnalysis).toBeDefined();
+      expect(response.output.hiringNeeds).toBeDefined();
+      expect(response.output.costProjections).toBeDefined();
     });
 
     it('should scan compliance health', async () => {
@@ -592,11 +595,11 @@ describe('AI Agent Framework', () => {
       const response = await analyticsAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.overallHealth).toBeDefined();
-      expect(response.result.moduleScores).toBeDefined();
-      expect(Array.isArray(response.result.criticalIssues)).toBe(true);
-      expect(Array.isArray(response.result.recommendations)).toBe(true);
-      expect(response.result.complianceTrends).toBeDefined();
+      expect(response.output.overallHealth).toBeDefined();
+      expect(response.output.moduleScores).toBeDefined();
+      expect(Array.isArray(response.output.criticalIssues)).toBe(true);
+      expect(Array.isArray(response.output.recommendations)).toBe(true);
+      expect(response.output.complianceTrends).toBeDefined();
     });
 
     it('should analyze culture and engagement', async () => {
@@ -613,11 +616,11 @@ describe('AI Agent Framework', () => {
       const response = await analyticsAgent.processTask(task);
 
       expect(response.success).toBe(true);
-      expect(response.result.engagementScore).toBeDefined();
-      expect(response.result.cultureIndicators).toBeDefined();
-      expect(response.result.trends).toBeDefined();
-      expect(Array.isArray(response.result.drivers)).toBe(true);
-      expect(Array.isArray(response.result.improvementActions)).toBe(true);
+      expect(response.output.engagementScore).toBeDefined();
+      expect(response.output.cultureIndicators).toBeDefined();
+      expect(response.output.trends).toBeDefined();
+      expect(Array.isArray(response.output.drivers)).toBe(true);
+      expect(Array.isArray(response.output.improvementActions)).toBe(true);
     });
 
     it('should return error for unsupported task type', async () => {
@@ -633,7 +636,7 @@ describe('AI Agent Framework', () => {
     it('should create task with correct structure', () => {
       const task = createTask(AgentTaskType.ANALYZE, { data: 'test' }, { userId: 1 });
       expect(task.type).toBe(AgentTaskType.ANALYZE);
-      expect(task.payload).toEqual({ data: 'test' });
+      expect(task.input).toEqual({ data: 'test' });
       expect(task.id).toMatch(/^task_\d+_[a-z0-9]+$/);
     });
 

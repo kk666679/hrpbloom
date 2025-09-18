@@ -79,7 +79,7 @@ export function Sidebar({ className }: SidebarProps) {
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
 
-  const userRole = session?.user?.role || "EMPLOYEE"
+  const userRole = (session?.user as any)?.role || "EMPLOYEE"
   const filteredNavigation = navigation.filter((item) => item.roles.includes(userRole))
 
   const handleSignOut = () => {
@@ -138,15 +138,15 @@ export function Sidebar({ className }: SidebarProps) {
 
         {/* User Section */}
         <div className="border-t p-4">
-          {!collapsed && session && (
+          {!collapsed && session?.user && (
             <div className="mb-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                  {session.user.name?.charAt(0).toUpperCase()}
+                  {session.user.name?.charAt(0).toUpperCase() || '?'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{session.user.name}</p>
-                  <p className="text-xs text-muted-foreground truncate">{session.user.role}</p>
+                  <p className="text-sm font-medium truncate">{(session.user as any)?.name || 'User'}</p>
+                  <p className="text-xs text-muted-foreground truncate">{(session.user as any)?.role || 'EMPLOYEE'}</p>
                 </div>
               </div>
             </div>

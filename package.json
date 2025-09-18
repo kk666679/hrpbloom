@@ -10,7 +10,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@auth/core": "^0.40.0",
+    "next-auth": "^4.24.11",
     "@emotion/is-prop-valid": "latest",
     "@hookform/resolvers": "latest",
     "@prisma/client": "latest",
@@ -51,10 +51,10 @@
     "embla-carousel-react": "8.5.1",
     "framer-motion": "latest",
     "geist": "latest",
+    "glob": "^11.0.3",
     "input-otp": "1.4.1",
     "lucide-react": "^0.454.0",
     "next": "^15.5.3",
-    "next-auth": "^4.24.7",
     "next-themes": "^0.4.4",
     "nodemailer": "latest",
     "openai": "^5.20.3",
@@ -66,11 +66,12 @@
     "react-hook-form": "latest",
     "react-resizable-panels": "^2.1.7",
     "recharts": "2.15.0",
+    "rimraf": "^6.0.1",
     "sonner": "^1.7.1",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.6",
-    "vercel": "^48.0.2",
+    "vercel": "^32.0.1",
     "zod": "latest"
   },
   "devDependencies": {

@@ -1,10 +1,9 @@
-import type { Session, User } from "next-auth"
-type NextAuthOptions = any
+import type { Session, JWT } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
 import { prisma } from "@/lib/db"
 
 // Centralized NextAuth configuration
-export const authOptions: NextAuthOptions = {
+export const authOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -12,12 +11,12 @@ export const authOptions: NextAuthOptions = {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials: Partial<Record<"email" | "password", unknown>> | undefined, request: Request) {
         if (!credentials?.email || !credentials?.password) return null
 
         // Find user in database
         const user = await prisma.employee.findUnique({
-          where: { email: credentials.email },
+          where: { email: credentials.email as string },
           include: { company: true },
         })
 
@@ -39,6 +38,7 @@ export const authOptions: NextAuthOptions = {
           name: `${user.firstName} ${user.lastName}`,
           email: user.email,
           role: user.role,
+          employeeId: user.id.toString(),
           companyId: user.companyId.toString(),
         }
       },
@@ -59,7 +59,7 @@ export const authOptions: NextAuthOptions = {
       }
       return session
     },
-    async jwt({ token, user }: { token: any; user: User | undefined }) {
+    async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
         token.role = (user as any).role
         token.companyId = (user as any).companyId

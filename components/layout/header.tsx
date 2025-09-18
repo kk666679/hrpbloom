@@ -55,9 +55,9 @@ export function Header({ title }: HeaderProps) {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="flex items-center gap-2">
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                {session?.user?.name?.charAt(0).toUpperCase()}
+                {session?.user?.name ? session.user.name.charAt(0).toUpperCase() : ""}
               </div>
-              <span className="hidden md:block">{session?.user?.name}</span>
+              <span className="hidden md:block">{session?.user?.name ?? ""}</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">

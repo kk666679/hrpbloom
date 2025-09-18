@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { agentRegistry, createTask, createContext } from '@/lib/ai-agents'
-import { AgentTaskType } from '@/lib/ai-agents'
+import { AgentTaskType } from '@/types/ai-agents'
 import { prisma } from '@/lib/db'
 import {
   TaskPriority,
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions) as any
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate task type
-    if (!Object.values(AgentTaskType as any).includes(taskType)) {
+    if (!Object.values(AgentTaskType).includes(taskType as AgentTaskType)) {
       return NextResponse.json(
         { error: `Invalid task type: ${taskType}` },
         { status: 400 }
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     let conversationHistory: any[] = []
     let conversationId: number | null = null
 
-    if ([(AgentTaskType as any).CHAT, (AgentTaskType as any).QUESTION_ANSWER].includes(taskType)) {
+    if ([AgentTaskType.CHAT, AgentTaskType.QUESTION_ANSWER].includes(taskType as AgentTaskType)) {
       const existingConversation = await prisma.conversation.findFirst({
         where: {
           userId: parseInt(user.id),
@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
       const response = await agentRegistry.executeTask(task, context)
 
     // Save conversation for conversational tasks
-    if ([(AgentTaskType as any).CHAT, (AgentTaskType as any).QUESTION_ANSWER].includes(taskType)) {
+    if ([AgentTaskType.CHAT, AgentTaskType.QUESTION_ANSWER].includes(taskType as AgentTaskType)) {
       // Add user message to conversation
       const userMessage = {
         role: 'user',
@@ -180,7 +180,7 @@ export async function GET(request: NextRequest) {
   try {
     // Check authentication
     const session = await getServerSession(authOptions) as any
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }

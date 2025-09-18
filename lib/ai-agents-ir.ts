@@ -13,7 +13,7 @@ import {
 } from '@/types/ai-agents'
 import { generateCompletion, generateStructuredCompletion, AIModel, AI_MODELS } from './openai-client'
 import { prisma } from './db'
-import { AIBaseAgent } from './ai-agents'
+import { AIBaseAgent } from './ai-base-agent'
 
 // IR Agent - Handles Industrial Relations, disputes, legal precedents
 export class IRAgent extends AIBaseAgent {
