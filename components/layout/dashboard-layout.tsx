@@ -2,11 +2,12 @@
 
 import type React from "react"
 
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/hooks/use-auth"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { Sidebar } from "./sidebar"
 import { Header } from "./header"
+import { Card, CardContent } from "@/components/ui/card"
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -14,33 +15,27 @@ interface DashboardLayoutProps {
 }
 
 export function DashboardLayout({ children, title }: DashboardLayoutProps) {
-  const { data: session, status } = useSession()
+  const { user } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
-    if (status === "unauthenticated") {
+    if (!user) {
       router.push("/login")
     }
-  }, [status, router])
+  }, [user, router])
 
-  if (status === "loading") {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-lg">Loading...</div>
-      </div>
-    )
-  }
-
-  if (!session) {
+  if (!user) {
     return null
   }
 
   return (
     <div className="flex h-screen bg-background">
       <Sidebar />
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden p-4">
         <Header title={title} />
-        <main className="flex-1 overflow-auto">{children}</main>
+        <Card className="flex-1 overflow-auto">
+          <CardContent>{children}</CardContent>
+        </Card>
       </div>
     </div>
   )

@@ -7,6 +7,40 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model AIAgent {
+  id           Int            @id @default(autoincrement())
+  name         String
+  type         AIAgentType
+  config       Json
+  isActive     Boolean        @default(true)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime
+  AILog        AILog[]
+  Conversation Conversation[]
+}
+
+model AILog {
+  id        Int      @id @default(autoincrement())
+  agentId   Int
+  action    String
+  input     Json
+  output    Json
+  timestamp DateTime @default(now())
+  AIAgent   AIAgent  @relation(fields: [agentId], references: [id])
+}
+
+model Attendance {
+  id          Int       @id @default(autoincrement())
+  date        DateTime
+  checkIn     DateTime
+  checkOut    DateTime?
+  hoursWorked Float?
+  employeeId  Int
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime
+  Employee    Employee  @relation(fields: [employeeId], references: [id])
+}
+
 model Company {
   id             Int        @id @default(autoincrement())
   name           String
@@ -14,75 +48,21 @@ model Company {
   address        String
   contactNo      String
   email          String
-  employees      Employee[]
-  jobs           Job[]
   createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
+  updatedAt      DateTime
+  Employee       Employee[]
+  Job            Job[]
 }
 
-model Employee {
-  id           Int            @id @default(autoincrement())
-  employeeId   String         @unique
-  firstName    String
-  lastName     String
-  nric         String         @unique
-  passportNo   String?
-  email        String         @unique
-  phone        String
-  address      String
-  dateOfBirth  DateTime
-  dateJoined   DateTime
-  department   String
-  position     String
-  salary       Float
-  epfNo        String?
-  socsoNo      String?
-  taxNo        String?
-  bankAccount  String?
-  status       EmployeeStatus @default(ACTIVE)
-  leaveBalance Int            @default(21)
-  password     String
-  role         UserRole       @default(EMPLOYEE)
-  // Employer fields
-  employerCompanyName String?
-  employerDescription String?
-  employerWebsite     String?
-  // Job seeker fields
-  skills             String?
-  experienceYears    Int?
-  documents          Document[]
-  leaves             Leave[]
-  attendances        Attendance[]
-  payrolls           Payroll[]
-  jobs               Job[]
-  applications       JobApplication[]
-  resumes            Resume[]
-  conversations      Conversation[]
-  recommendations    Recommendation[]
-  irCases            IRCase[]       @relation("EmployeeIRCases")
-  irCaseActions      IRCaseAction[] @relation("EmployeeIRCaseActions")
-  irCaseDocuments    IRCaseDocument[] @relation("EmployeeIRCaseDocuments")
-  company            Company        @relation(fields: [companyId], references: [id])
-  companyId          Int
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-}
-
-enum EmployeeStatus {
-  ACTIVE
-  INACTIVE
-  PROBATION
-  RESIGNED
-  TERMINATED
-}
-
-enum UserRole {
-  ADMIN
-  HR
-  MANAGER
-  EMPLOYEE
-  EMPLOYER
-  JOB_SEEKER
+model Conversation {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  agentId   Int
+  messages  Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  AIAgent   AIAgent  @relation(fields: [agentId], references: [id])
+  Employee  Employee @relation(fields: [userId], references: [id])
 }
 
 model Document {
@@ -91,9 +71,130 @@ model Document {
   type       String
   key        String   @unique
   url        String
-  employee   Employee @relation(fields: [employeeId], references: [id])
   employeeId Int
   uploadedAt DateTime @default(now())
+  Employee   Employee @relation(fields: [employeeId], references: [id])
+}
+
+model Employee {
+  id                  Int              @id @default(autoincrement())
+  employeeId          String           @unique
+  firstName           String
+  lastName            String
+  nric                String           @unique
+  passportNo          String?
+  email               String           @unique
+  phone               String
+  address             String
+  dateOfBirth         DateTime
+  dateJoined          DateTime
+  department          String
+  position            String
+  salary              Float
+  epfNo               String?
+  socsoNo             String?
+  taxNo               String?
+  bankAccount         String?
+  status              EmployeeStatus   @default(ACTIVE)
+  leaveBalance        Int              @default(21)
+  password            String
+  role                UserRole         @default(EMPLOYEE)
+  employerCompanyName String?
+  employerDescription String?
+  employerWebsite     String?
+  skills              String?
+  experienceYears     Int?
+  companyId           Int
+  createdAt           DateTime         @default(now())
+  updatedAt           DateTime
+  Attendance          Attendance[]
+  Conversation        Conversation[]
+  Document            Document[]
+  Company             Company          @relation(fields: [companyId], references: [id])
+  IRCase              IRCase[]
+  IRCaseAction        IRCaseAction[]
+  IRCaseDocument      IRCaseDocument[]
+  Job                 Job[]
+  JobApplication      JobApplication[]
+  Leave               Leave[]
+  Payroll             Payroll[]
+  Recommendation      Recommendation[]
+  Resume              Resume[]
+}
+
+model IRCase {
+  id             Int              @id @default(autoincrement())
+  caseNumber     String           @unique
+  employeeId     Int
+  type           IRCaseType
+  status         IRCaseStatus     @default(OPEN)
+  description    String
+  allegations    Json
+  riskLevel      RiskLevel        @default(LOW)
+  assignedTo     Int?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  Employee       Employee         @relation(fields: [employeeId], references: [id])
+  IRCaseAction   IRCaseAction[]
+  IRCaseDocument IRCaseDocument[]
+}
+
+model IRCaseAction {
+  id          Int      @id @default(autoincrement())
+  caseId      Int
+  action      String
+  performedBy Int
+  notes       String?
+  timestamp   DateTime @default(now())
+  IRCase      IRCase   @relation(fields: [caseId], references: [id])
+  Employee    Employee @relation(fields: [performedBy], references: [id])
+}
+
+model IRCaseDocument {
+  id         Int      @id @default(autoincrement())
+  caseId     Int
+  name       String
+  type       String
+  url        String
+  uploadedBy Int
+  uploadedAt DateTime @default(now())
+  IRCase     IRCase   @relation(fields: [caseId], references: [id])
+  Employee   Employee @relation(fields: [uploadedBy], references: [id])
+}
+
+model Job {
+  id             Int              @id @default(autoincrement())
+  title          String
+  description    String
+  requirements   String
+  location       String
+  department     String?
+  salaryMin      Float?
+  salaryMax      Float?
+  type           JobType
+  status         JobStatus        @default(OPEN)
+  employerId     Int
+  companyId      Int?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  Company        Company?         @relation(fields: [companyId], references: [id])
+  Employee       Employee         @relation(fields: [employerId], references: [id])
+  JobApplication JobApplication[]
+  Recommendation Recommendation[]
+}
+
+model JobApplication {
+  id          Int               @id @default(autoincrement())
+  jobId       Int
+  applicantId Int
+  resumeId    Int
+  coverLetter String?
+  status      ApplicationStatus @default(PENDING)
+  appliedAt   DateTime          @default(now())
+  updatedAt   DateTime
+  Employee    Employee          @relation(fields: [applicantId], references: [id])
+  Job         Job               @relation(fields: [jobId], references: [id])
+  Resume      Resume            @relation(fields: [resumeId], references: [id])
 }
 
 model Leave {
@@ -103,48 +204,57 @@ model Leave {
   endDate    DateTime
   reason     String
   status     LeaveStatus @default(PENDING)
-  employee   Employee    @relation(fields: [employeeId], references: [id])
   employeeId Int
   appliedAt  DateTime    @default(now())
   approvedAt DateTime?
   approvedBy Int?
+  Employee   Employee    @relation(fields: [employeeId], references: [id])
 }
 
-enum LeaveType {
-  ANNUAL
-  SICK
-  MATERNITY
-  PATERNITY
-  UNPAID
-  EMERGENCY
-  COMPASSIONATE
+model Payroll {
+  id               Int       @id @default(autoincrement())
+  month            Int
+  year             Int
+  basicSalary      Float
+  allowances       Float     @default(0)
+  deductions       Float     @default(0)
+  epfAmount        Float
+  socsoAmount      Float
+  eisAmount        Float     @default(0)
+  tabungHajiAmount Float     @default(0)
+  taxAmount        Float
+  zakatAmount      Float     @default(0)
+  netSalary        Float
+  employeeId       Int
+  paidAt           DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime
+  Employee         Employee  @relation(fields: [employeeId], references: [id])
+
+  @@unique([employeeId, month, year])
 }
 
-enum LeaveStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  CANCELLED
+model Recommendation {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  jobId     Int
+  score     Float
+  reasons   Json
+  createdAt DateTime @default(now())
+  Job       Job      @relation(fields: [jobId], references: [id])
+  Employee  Employee @relation(fields: [userId], references: [id])
 }
 
-enum JobType {
-  FULL_TIME
-  PART_TIME
-  CONTRACT
-  FREELANCE
-}
-
-enum JobStatus {
-  OPEN
-  CLOSED
-  FILLED
-}
-
-enum ApplicationStatus {
-  PENDING
-  REVIEWED
-  ACCEPTED
-  REJECTED
+model Resume {
+  id             Int              @id @default(autoincrement())
+  employeeId     Int
+  fileUrl        String
+  fileName       String
+  parsedData     Json?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime
+  JobApplication JobApplication[]
+  Employee       Employee         @relation(fields: [employeeId], references: [id])
 }
 
 enum AIAgentType {
@@ -162,147 +272,27 @@ enum AIAgentType {
   RECOMMENDER
 }
 
-model Attendance {
-  id          Int      @id @default(autoincrement())
-  date        DateTime
-  checkIn     DateTime
-  checkOut    DateTime?
-  hoursWorked Float?
-  employee    Employee @relation(fields: [employeeId], references: [id])
-  employeeId  Int
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+enum ApplicationStatus {
+  PENDING
+  REVIEWED
+  ACCEPTED
+  REJECTED
 }
 
-model Payroll {
-  id                Int      @id @default(autoincrement())
-  month             Int
-  year              Int
-  basicSalary       Float
-  allowances        Float    @default(0)
-  deductions        Float    @default(0)
-  epfAmount         Float
-  socsoAmount       Float
-  eisAmount         Float    @default(0) // Employment Insurance System
-  tabungHajiAmount  Float    @default(0) // Tabung Haji contribution
-  taxAmount         Float
-  zakatAmount       Float    @default(0) // Zakat contribution
-  netSalary         Float
-  employee          Employee @relation(fields: [employeeId], references: [id])
-  employeeId        Int
-  paidAt            DateTime?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-
-  @@unique([employeeId, month, year])
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+  PROBATION
+  RESIGNED
+  TERMINATED
 }
 
-model Job {
-  id             Int           @id @default(autoincrement())
-  title          String
-  description    String
-  requirements   String
-  location       String
-  department     String?
-  salaryMin      Float?
-  salaryMax      Float?
-  type           JobType
-  status         JobStatus     @default(OPEN)
-  employer       Employee      @relation(fields: [employerId], references: [id])
-  employerId     Int
-  company        Company?      @relation(fields: [companyId], references: [id])
-  companyId      Int?
-  applications   JobApplication[]
-  recommendations Recommendation[]
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
-}
-
-model JobApplication {
-  id          Int               @id @default(autoincrement())
-  job         Job               @relation(fields: [jobId], references: [id])
-  jobId       Int
-  applicant   Employee          @relation(fields: [applicantId], references: [id])
-  applicantId Int
-  resume      Resume            @relation(fields: [resumeId], references: [id])
-  resumeId    Int
-  coverLetter String?
-  status      ApplicationStatus @default(PENDING)
-  appliedAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
-}
-
-model Resume {
-  id           Int             @id @default(autoincrement())
-  employee     Employee        @relation(fields: [employeeId], references: [id])
-  employeeId   Int
-  fileUrl      String
-  fileName     String
-  parsedData   Json?
-  applications JobApplication[]
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
-}
-
-model AIAgent {
-  id           Int           @id @default(autoincrement())
-  name         String
-  type         AIAgentType
-  config       Json
-  isActive     Boolean       @default(true)
-  conversations Conversation[]
-  logs         AILog[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-}
-
-model Conversation {
-  id        Int      @id @default(autoincrement())
-  user      Employee @relation(fields: [userId], references: [id])
-  userId    Int
-  agent     AIAgent  @relation(fields: [agentId], references: [id])
-  agentId   Int
-  messages  Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
-
-model Recommendation {
-  id        Int      @id @default(autoincrement())
-  user      Employee @relation(fields: [userId], references: [id])
-  userId    Int
-  job       Job      @relation(fields: [jobId], references: [id])
-  jobId     Int
-  score     Float
-  reasons   Json
-  createdAt DateTime @default(now())
-}
-
-model AILog {
-  id        Int      @id @default(autoincrement())
-  agent     AIAgent  @relation(fields: [agentId], references: [id])
-  agentId   Int
-  action    String
-  input     Json
-  output    Json
-  timestamp DateTime @default(now())
-}
-
-model IRCase {
-  id            Int         @id @default(autoincrement())
-  caseNumber    String      @unique
-  employee      Employee    @relation(fields: [employeeId], references: [id], name: "EmployeeIRCases")
-  employeeId    Int
-  type          IRCaseType
-  status        IRCaseStatus @default(OPEN)
-  description   String
-  allegations   Json        // Array of allegations
-  riskLevel     RiskLevel   @default(LOW)
-  assignedTo    Int?        // HR/IR officer ID
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
-  actions       IRCaseAction[]
-  documents     IRCaseDocument[]
+enum IRCaseStatus {
+  OPEN
+  INVESTIGATING
+  RESOLVED
+  CLOSED
+  ESCALATED
 }
 
 enum IRCaseType {
@@ -314,12 +304,34 @@ enum IRCaseType {
   COMPLIANCE_VIOLATION
 }
 
-enum IRCaseStatus {
+enum JobStatus {
   OPEN
-  INVESTIGATING
-  RESOLVED
   CLOSED
-  ESCALATED
+  FILLED
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  CONTRACT
+  FREELANCE
+}
+
+enum LeaveStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum LeaveType {
+  ANNUAL
+  SICK
+  MATERNITY
+  PATERNITY
+  UNPAID
+  EMERGENCY
+  COMPASSIONATE
 }
 
 enum RiskLevel {
@@ -329,25 +341,11 @@ enum RiskLevel {
   CRITICAL
 }
 
-model IRCaseAction {
-  id        Int      @id @default(autoincrement())
-  case      IRCase   @relation(fields: [caseId], references: [id])
-  caseId    Int
-  action    String
-  performedBy Int    // Employee ID who performed the action
-  performedByEmployee Employee @relation(fields: [performedBy], references: [id], name: "EmployeeIRCaseActions")
-  notes     String?
-  timestamp DateTime @default(now())
-}
-
-model IRCaseDocument {
-  id         Int      @id @default(autoincrement())
-  case       IRCase   @relation(fields: [caseId], references: [id])
-  caseId     Int
-  name       String
-  type       String
-  url        String
-  uploadedBy Int      // Employee ID who uploaded
-  uploadedByEmployee Employee @relation(fields: [uploadedBy], references: [id], name: "EmployeeIRCaseDocuments")
-  uploadedAt DateTime @default(now())
+enum UserRole {
+  ADMIN
+  HR
+  MANAGER
+  EMPLOYEE
+  EMPLOYER
+  JOB_SEEKER
 }

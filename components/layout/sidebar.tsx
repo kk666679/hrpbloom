@@ -1,12 +1,28 @@
 "use client"
 
 import { useState } from "react"
-import { useSession, signOut } from "next-auth/react"
+import { useAuth } from "@/hooks/use-auth"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Building,
   Users,
@@ -19,6 +35,9 @@ import {
   Menu,
   X,
   Home,
+  ChevronDown,
+  ChevronRight,
+  Info,
 } from "lucide-react"
 
 interface SidebarProps {
@@ -38,6 +57,18 @@ const navigation = [
     icon: Users,
     roles: ["ADMIN", "HR", "MANAGER"],
     badge: "manage",
+    children: [
+      {
+        name: "Add Employee",
+        href: "/employees/add",
+        roles: ["ADMIN", "HR"],
+      },
+      {
+        name: "Employee List",
+        href: "/employees",
+        roles: ["ADMIN", "HR", "MANAGER"],
+      },
+    ],
   },
   {
     name: "Leave Management",
@@ -75,23 +106,32 @@ const navigation = [
 ]
 
 export function Sidebar({ className }: SidebarProps) {
-  const { data: session } = useSession()
+  const { user, logout } = useAuth()
   const pathname = usePathname()
   const [collapsed, setCollapsed] = useState(false)
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({})
 
-  const userRole = (session?.user as any)?.role || "EMPLOYEE"
+  const userRole = user?.role || "EMPLOYEE"
   const filteredNavigation = navigation.filter((item) => item.roles.includes(userRole))
 
   const handleSignOut = () => {
-    signOut({ callbackUrl: "/" })
+    logout()
+  }
+
+  const toggleSection = (sectionName: string) => {
+    setOpenSections(prev => ({
+      ...prev,
+      [sectionName]: !prev[sectionName]
+    }))
   }
 
   return (
-    <div className={cn("flex h-screen bg-background", className)}>
-      {/* Sidebar */}
-      <div
-        className={cn("flex flex-col border-r bg-background transition-all duration-300", collapsed ? "w-16" : "w-64")}
-      >
+    <TooltipProvider>
+      <div className={cn("flex h-screen bg-background", className)}>
+        {/* Sidebar */}
+        <div
+          className={cn("flex flex-col border-r bg-background transition-all duration-300", collapsed ? "w-16" : "w-64")}
+        >
         {/* Header */}
         <div className="flex h-16 items-center justify-between px-4 border-b">
           {!collapsed && (
@@ -109,44 +149,101 @@ export function Sidebar({ className }: SidebarProps) {
         <nav className="flex-1 space-y-1 p-4">
           {filteredNavigation.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+            if (item.children && item.children.length > 0) {
+              const isSectionOpen = openSections[item.name] ?? false
+              return (
+                <div key={item.name} className="mb-2">
+                  <Collapsible open={isSectionOpen} onOpenChange={() => toggleSection(item.name)}>
+                    <CollapsibleTrigger
+                      className={cn(
+                        "flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                      )}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon className="h-4 w-4 flex-shrink-0" />
+                        {!collapsed && <span>{item.name}</span>}
+                      </div>
+                      {!collapsed && (
+                        <span>
+                          {isSectionOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        </span>
+                      )}
+                    </CollapsibleTrigger>
+                    <CollapsibleContent>
+                      <div className="ml-8 mt-1 flex flex-col space-y-1">
+                        {item.children.map((child) => {
+                          const isChildActive = pathname === child.href || pathname.startsWith(child.href + "/")
+                          if (!child.roles.includes(userRole)) return null
+                          return (
+                            <Link
+                              key={child.name}
+                              href={child.href}
+                              className={cn(
+                                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                                isChildActive
+                                  ? "bg-primary text-primary-foreground"
+                                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
+                              )}
+                            >
+                              {!collapsed && <span>{child.name}</span>}
+                            </Link>
+                          )
+                        })}
+                      </div>
+                    </CollapsibleContent>
+                  </Collapsible>
+                </div>
+              )
+            }
             return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  isActive
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
-                )}
-              >
-                <item.icon className="h-4 w-4 flex-shrink-0" />
-                {!collapsed && (
-                  <>
-                    <span className="flex-1">{item.name}</span>
-                    {item.badge && (
-                      <Badge variant="secondary" className="text-xs">
-                        {item.badge}
-                      </Badge>
+              <Tooltip key={item.name}>
+                <TooltipTrigger asChild>
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
                     )}
-                  </>
+                  >
+                    <item.icon className="h-4 w-4 flex-shrink-0" />
+                    {!collapsed && (
+                      <>
+                        <span className="flex-1">{item.name}</span>
+                        {item.badge && (
+                          <Badge variant="secondary" className="text-xs">
+                            {item.badge}
+                          </Badge>
+                        )}
+                      </>
+                    )}
+                  </Link>
+                </TooltipTrigger>
+                {collapsed && (
+                  <TooltipContent side="right">
+                    <p>{item.name}</p>
+                  </TooltipContent>
                 )}
-              </Link>
+              </Tooltip>
             )
           })}
         </nav>
 
         {/* User Section */}
         <div className="border-t p-4">
-          {!collapsed && session?.user && (
+          {!collapsed && user && (
             <div className="mb-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium">
-                  {session.user.name?.charAt(0).toUpperCase() || '?'}
+                  {user.name?.charAt(0).toUpperCase() || '?'}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">{(session.user as any)?.name || 'User'}</p>
-                  <p className="text-xs text-muted-foreground truncate">{(session.user as any)?.role || 'EMPLOYEE'}</p>
+                  <p className="text-sm font-medium truncate">{user.name || 'User'}</p>
+                  <p className="text-xs text-muted-foreground truncate">{user.role || 'EMPLOYEE'}</p>
                 </div>
               </div>
             </div>
@@ -161,7 +258,8 @@ export function Sidebar({ className }: SidebarProps) {
             {!collapsed && <span className="ml-3">Sign Out</span>}
           </Button>
         </div>
+        </div>
       </div>
-    </div>
+    </TooltipProvider>
   )
 }

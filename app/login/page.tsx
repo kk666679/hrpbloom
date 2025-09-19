@@ -5,7 +5,7 @@ import { useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { signIn } from "next-auth/react"
+import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -23,16 +23,20 @@ export default function LoginPage() {
     setIsLoading(true)
     setError("")
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      redirect: false,
-    })
+    try {
+      const response = await api.post("/auth/login", { email, password })
+      const data = await response.json()
 
-    if (result?.error) {
-      setError("Invalid credentials. Please check your email and password.")
-    } else {
-      router.push("/dashboard")
+      if (response.ok) {
+        // Store token in cookie for middleware
+        document.cookie = `auth-token=${data.access_token}; path=/; max-age=86400; samesite=strict`
+        localStorage.setItem("email", email)
+        router.push("/dashboard")
+      } else {
+        setError(data.message || "Invalid credentials. Please check your email and password.")
+      }
+    } catch (error) {
+      setError("Login failed. Please try again.")
     }
 
     setIsLoading(false)

@@ -1,6 +1,7 @@
 "use client"
 
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/hooks/use-auth"
+import { api } from "@/lib/api"
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -20,14 +21,14 @@ interface EmployeeData {
 }
 
 export default function EmployeePortal() {
-  const { data: session } = useSession()
+  const { user } = useAuth()
   const [employeeData, setEmployeeData] = useState<EmployeeData | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchEmployeeData = async () => {
       try {
-        const response = await fetch("/api/employee/profile")
+        const response = await api.get("/employee/profile")
         const data = await response.json()
         setEmployeeData(data)
       } catch (error) {
@@ -37,10 +38,10 @@ export default function EmployeePortal() {
       }
     }
 
-    if (session) {
+    if (user) {
       fetchEmployeeData()
     }
-  }, [session])
+  }, [user])
 
   if (loading) {
     return (
@@ -57,7 +58,7 @@ export default function EmployeePortal() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Employee Portal</h1>
-          <p className="text-gray-600">Welcome back, {session?.user?.name}</p>
+          <p className="text-gray-600">Welcome back, {user?.name}</p>
         </div>
 
         {employeeData && (

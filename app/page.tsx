@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { PublicHeader } from "@/components/layout/public-header"
+import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/layout/footer"
 import { Building, Users, Calendar, DollarSign, FileText, Shield, CheckCircle, Star, ArrowRight, Briefcase, TrendingUp, Heart } from "lucide-react"
 import { motion } from "framer-motion"
@@ -11,7 +11,7 @@ import { motion } from "framer-motion"
 export default function Home() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <PublicHeader />
+      <Navbar />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-20">

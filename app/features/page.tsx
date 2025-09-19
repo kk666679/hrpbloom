@@ -1,6 +1,5 @@
 import Link from "next/link"
 import { Navbar } from "@/components/Navbar"
-import { PublicHeader } from "@/components/layout/public-header"
 import { Footer } from "@/components/layout/footer"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -100,7 +99,6 @@ export default function Features() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
       <Navbar />
-      <PublicHeader />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-20">

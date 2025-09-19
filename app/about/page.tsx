@@ -1,4 +1,4 @@
-import { PublicHeader } from "@/components/layout/public-header"
+import { Navbar } from "@/components/Navbar"
 import { Footer } from "@/components/layout/footer"
 import { Card, CardContent } from "@/components/ui/card"
 import { Building, Target, Eye, Users, Award, Heart, Shield } from "lucide-react"
@@ -6,7 +6,7 @@ import { Building, Target, Eye, Users, Award, Heart, Shield } from "lucide-react
 export default function About() {
   return (
     <div className="min-h-screen bg-white dark:bg-gray-900">
-      <PublicHeader />
+      <Navbar />
 
       {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 py-20">

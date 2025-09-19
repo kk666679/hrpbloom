@@ -2,7 +2,8 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/hooks/use-auth"
+import { api } from "@/lib/api"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -39,7 +40,7 @@ const employeeSchema = z.object({
 type EmployeeFormData = z.infer<typeof employeeSchema>
 
 export default function AddEmployeePage() {
-  const { data: session } = useSession()
+  const { user } = useAuth()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [tempPassword, setTempPassword] = useState("")
@@ -57,7 +58,7 @@ export default function AddEmployeePage() {
     },
   })
 
-  const canManageEmployees = session?.user.role === "ADMIN" || session?.user.role === "HR"
+  const canManageEmployees = user?.role === "ADMIN" || user?.role === "HR"
 
   if (!canManageEmployees) {
     return (
@@ -73,13 +74,7 @@ export default function AddEmployeePage() {
   const onSubmit = async (data: EmployeeFormData) => {
     setLoading(true)
     try {
-      const response = await fetch("/api/employees", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      })
+      const response = await api.post("/employees", data)
 
       const result = await response.json()
 
@@ -159,7 +154,7 @@ export default function AddEmployeePage() {
                     <SelectContent>
                       <SelectItem value="EMPLOYEE">Employee</SelectItem>
                       <SelectItem value="MANAGER">Manager</SelectItem>
-                      {session?.user.role === "ADMIN" && (
+                      {user?.role === "ADMIN" && (
                         <>
                           <SelectItem value="HR">HR</SelectItem>
                           <SelectItem value="ADMIN">Admin</SelectItem>

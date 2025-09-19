@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/hooks/use-auth"
+import { api } from "@/lib/api"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -50,7 +51,7 @@ interface Pagination {
 }
 
 export default function LeavesPage() {
-  const { data: session } = useSession()
+  const { user } = useAuth()
   const [leaves, setLeaves] = useState<Leave[]>([])
   const [leaveBalance, setLeaveBalance] = useState<LeaveBalance | null>(null)
   const [pagination, setPagination] = useState<Pagination | null>(null)
@@ -59,7 +60,7 @@ export default function LeavesPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [typeFilter, setTypeFilter] = useState("all")
 
-  const canApproveLeaves = ["ADMIN", "HR", "MANAGER"].includes(session?.user.role || "")
+  const canApproveLeaves = ["ADMIN", "HR", "MANAGER"].includes(user?.role || "")
 
   useEffect(() => {
     fetchLeaves()
@@ -76,7 +77,7 @@ export default function LeavesPage() {
         ...(typeFilter !== "all" && { type: typeFilter }),
       })
 
-      const response = await fetch(`/api/leaves?${params}`)
+      const response = await api.get(`/leaves?${params}`)
       const data = await response.json()
 
       if (response.ok) {
@@ -92,7 +93,7 @@ export default function LeavesPage() {
 
   const fetchLeaveBalance = async () => {
     try {
-      const response = await fetch("/api/leaves/balance")
+      const response = await api.get("/leaves/balance")
       const data = await response.json()
 
       if (response.ok) {
@@ -105,13 +106,7 @@ export default function LeavesPage() {
 
   const handleApproval = async (leaveId: number, status: string) => {
     try {
-      const response = await fetch(`/api/leaves/${leaveId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ status }),
-      })
+      const response = await api.put(`/leaves/${leaveId}`, { status })
 
       if (response.ok) {
         fetchLeaves()

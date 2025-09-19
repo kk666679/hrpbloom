@@ -7,12 +7,16 @@ const prisma = new PrismaClient();
 
 // GET /api/jobs - List all jobs with optional filters
 export async function GET(request: NextRequest) {
+  console.log('GET /api/jobs called');
   try {
+    console.log('Initializing Prisma client...');
     const { searchParams } = new URL(request.url);
     const department = searchParams.get('department');
     const location = searchParams.get('location');
     const type = searchParams.get('type');
     const status = searchParams.get('status') || 'OPEN';
+
+    console.log('Search params:', { department, location, type, status });
 
     const where: any = { status: status as any };
 
@@ -20,10 +24,13 @@ export async function GET(request: NextRequest) {
     if (location) where.location = location;
     if (type) where.type = type as any;
 
+    console.log('Where clause:', where);
+
+    console.log('Executing Prisma query...');
     const jobs = await prisma.job.findMany({
       where,
       include: {
-        employer: {
+        Employee: {
           select: {
             firstName: true,
             lastName: true,
@@ -31,8 +38,8 @@ export async function GET(request: NextRequest) {
             employerCompanyName: true,
           },
         },
-        company: true,
-        applications: {
+        Company: true,
+        JobApplication: {
           select: {
             id: true,
             status: true,
@@ -43,6 +50,7 @@ export async function GET(request: NextRequest) {
       orderBy: { createdAt: 'desc' },
     });
 
+    console.log('Query completed, found', jobs.length, 'jobs');
     return NextResponse.json(jobs);
   } catch (error) {
     console.error('Error fetching jobs:', error);
@@ -104,14 +112,14 @@ export async function POST(request: NextRequest) {
         companyId: companyId ? parseInt(companyId) : dbUser.companyId,
       },
       include: {
-        employer: {
+        Employee: {
           select: {
             firstName: true,
             lastName: true,
             employerCompanyName: true,
           },
         },
-        company: true,
+        Company: true,
       },
     });
 

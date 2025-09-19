@@ -3,7 +3,8 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
+import { useAuth } from "@/hooks/use-auth"
+import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -13,7 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Upload, FileText, ImageIcon, Download, Trash2, Plus } from "lucide-react"
 
-interface Document {
+interface DocumentItem {
   id: number
   name: string
   type: string
@@ -29,15 +30,15 @@ interface Document {
 }
 
 export default function DocumentsPage() {
-  const { data: session } = useSession()
-  const [documents, setDocuments] = useState<Document[]>([])
+  const { user } = useAuth()
+  const [documents, setDocuments] = useState<DocumentItem[]>([])
   const [loading, setLoading] = useState(true)
   const [typeFilter, setTypeFilter] = useState("all")
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [employees, setEmployees] = useState<any[]>([])
 
-  const canManageDocuments = ["ADMIN", "HR"].includes(session?.user.role || "")
+  const canManageDocuments = ["ADMIN", "HR"].includes(user?.role || "")
 
   useEffect(() => {
     fetchDocuments()
@@ -53,7 +54,7 @@ export default function DocumentsPage() {
         ...(typeFilter !== "all" && { type: typeFilter }),
       })
 
-      const response = await fetch(`/api/documents?${params}`)
+      const response = await api.get(`/documents?${params}`)
       const data = await response.json()
 
       if (response.ok) {
@@ -68,7 +69,7 @@ export default function DocumentsPage() {
 
   const fetchEmployees = async () => {
     try {
-      const response = await fetch("/api/employees?limit=1000")
+      const response = await api.get("/employees?limit=1000")
       const data = await response.json()
 
       if (response.ok) {
@@ -86,10 +87,7 @@ export default function DocumentsPage() {
     const formData = new FormData(event.currentTarget)
 
     try {
-      const response = await fetch("/api/documents", {
-        method: "POST",
-        body: formData,
-      })
+      const response = await api.post("/documents", formData)
 
       if (response.ok) {
         setUploadDialogOpen(false)
@@ -112,9 +110,7 @@ export default function DocumentsPage() {
     if (!confirm("Are you sure you want to delete this document?")) return
 
     try {
-      const response = await fetch(`/api/documents/${documentId}`, {
-        method: "DELETE",
-      })
+      const response = await api.delete(`/documents/${documentId}`)
 
       if (response.ok) {
         fetchDocuments()
@@ -124,14 +120,14 @@ export default function DocumentsPage() {
     }
   }
 
-  const handleDownload = (document: Document) => {
+  const handleDownload = (doc: DocumentItem) => {
     // Create a temporary link to download the file
-    const link = document.createElement("a")
-    link.href = document.url
-    link.download = document.name
-    document.body.appendChild(link)
+    const link = window.document.createElement("a")
+    link.href = doc.url
+    link.download = doc.name
+    window.document.body.appendChild(link)
     link.click()
-    document.body.removeChild(link)
+    window.document.body.removeChild(link)
   }
 
   const getFileIcon = (type: string) => {
@@ -205,7 +201,7 @@ export default function DocumentsPage() {
                 </div>
               )}
 
-              {!canManageDocuments && <input type="hidden" name="employeeId" value={session?.user.employeeId} />}
+              {!canManageDocuments && <input type="hidden" name="employeeId" value={user?.employeeId} />}
 
               <div>
                 <Label htmlFor="type">Document Type</Label>
@@ -301,36 +297,36 @@ export default function DocumentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {documents.map((document) => (
-                <TableRow key={document.id}>
+              {documents.map((doc) => (
+                <TableRow key={doc.id}>
                   <TableCell>
                     <div className="flex items-center gap-2">
-                      {getFileIcon(document.type)}
+                      {getFileIcon(doc.type)}
                       <div>
-                        <div className="font-medium">{document.name}</div>
-                        <div className="text-sm text-muted-foreground">{document.key}</div>
+                        <div className="font-medium">{doc.name}</div>
+                        <div className="text-sm text-muted-foreground">{doc.key}</div>
                       </div>
                     </div>
                   </TableCell>
                   <TableCell>
                     <div>
                       <div className="font-medium">
-                        {document.employee.firstName} {document.employee.lastName}
+                        {doc.employee.firstName} {doc.employee.lastName}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {document.employee.employeeId} • {document.employee.department}
+                        {doc.employee.employeeId} • {doc.employee.department}
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{getDocumentTypeBadge(document.type)}</TableCell>
-                  <TableCell>{new Date(document.uploadedAt).toLocaleDateString()}</TableCell>
+                  <TableCell>{getDocumentTypeBadge(doc.type)}</TableCell>
+                  <TableCell>{new Date(doc.uploadedAt).toLocaleDateString()}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-2">
-                      <Button variant="ghost" size="sm" onClick={() => handleDownload(document)}>
+                      <Button variant="ghost" size="sm" onClick={() => handleDownload(doc)}>
                         <Download className="h-4 w-4" />
                       </Button>
                       {canManageDocuments && (
-                        <Button variant="ghost" size="sm" onClick={() => handleDelete(document.id)}>
+                        <Button variant="ghost" size="sm" onClick={() => handleDelete(doc.id)}>
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       )}

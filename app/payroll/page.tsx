@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
 import Link from "next/link"
+import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -39,13 +39,13 @@ interface Pagination {
 }
 
 export default function PayrollPage() {
-  const { data: session } = useSession()
   const [payrolls, setPayrolls] = useState<Payroll[]>([])
   const [pagination, setPagination] = useState<Pagination | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
   const [selectedMonth, setSelectedMonth] = useState("0")
   const [selectedYear, setSelectedYear] = useState("0")
+  const [userRole, setUserRole] = useState<string | null>(null)
   const [stats, setStats] = useState({
     totalPayroll: 0,
     totalEmployees: 0,
@@ -53,7 +53,17 @@ export default function PayrollPage() {
     pendingPayments: 0,
   })
 
-  const canManagePayroll = session?.user.role === "ADMIN" || session?.user.role === "HR"
+  const canManagePayroll = userRole === "ADMIN" || userRole === "HR"
+
+  useEffect(() => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      const email = localStorage.getItem("email") || ""
+      if (email.includes("admin")) setUserRole("ADMIN")
+      else if (email.includes("hr")) setUserRole("HR")
+      else setUserRole("EMPLOYEE")
+    }
+  }, [])
 
   useEffect(() => {
     fetchPayrolls()
@@ -70,7 +80,7 @@ export default function PayrollPage() {
         ...(selectedYear !== "0" && { year: selectedYear }),
       })
 
-      const response = await fetch(`/api/payroll?${params}`)
+      const response = await api.get(`/payroll?${params}`)
       const data = await response.json()
 
       if (response.ok) {
@@ -97,7 +107,7 @@ export default function PayrollPage() {
         year: selectedYear !== "0" ? selectedYear : currentYear.toString(),
       })
 
-      const response = await fetch(`/api/payroll/stats?${params}`)
+      const response = await api.get(`/payroll/stats?${params}`)
       if (response.ok) {
         const data = await response.json()
         setStats(data)
@@ -109,14 +119,8 @@ export default function PayrollPage() {
 
   const markAsPaid = async (payrollId: number) => {
     try {
-      const response = await fetch(`/api/payroll/${payrollId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          paidAt: new Date().toISOString(),
-        }),
+      const response = await api.put(`/payroll/${payrollId}`, {
+        paidAt: new Date().toISOString(),
       })
 
       if (response.ok) {

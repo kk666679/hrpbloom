@@ -42,8 +42,34 @@ export default function SignupPage() {
     }
 
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    setSuccess(true)
+
+    try {
+      const response = await fetch('http://localhost:3001/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+        }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        // Store token in cookie for middleware
+        document.cookie = `auth-token=${data.access_token}; path=/; max-age=86400; samesite=strict`
+        localStorage.setItem("email", formData.email)
+        setSuccess(true)
+      } else {
+        setError(data.message || "Signup failed. Please try again.")
+      }
+    } catch (error) {
+      setError("Signup failed. Please try again.")
+    }
+
     setIsLoading(false)
   }
 

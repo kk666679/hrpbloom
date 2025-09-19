@@ -1,8 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
 import Link from "next/link"
+import { api } from "@/lib/api"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
@@ -32,7 +32,6 @@ interface Pagination {
 }
 
 export default function EmployeesPage() {
-  const { data: session } = useSession()
   const [employees, setEmployees] = useState<Employee[]>([])
   const [pagination, setPagination] = useState<Pagination | null>(null)
   const [loading, setLoading] = useState(true)
@@ -40,8 +39,21 @@ export default function EmployeesPage() {
   const [search, setSearch] = useState("")
   const [department, setDepartment] = useState("all")
   const [status, setStatus] = useState("all")
+  const [userRole, setUserRole] = useState<string | null>(null)
 
-  const canManageEmployees = session?.user.role === "ADMIN" || session?.user.role === "HR"
+  const canManageEmployees = userRole === "ADMIN" || userRole === "HR"
+
+  useEffect(() => {
+    // Get user role from token (simplified, in real app decode JWT)
+    const token = localStorage.getItem("token")
+    if (token) {
+      // For now, assume role from demo credentials
+      const email = localStorage.getItem("email") || ""
+      if (email.includes("admin")) setUserRole("ADMIN")
+      else if (email.includes("hr")) setUserRole("HR")
+      else setUserRole("EMPLOYEE")
+    }
+  }, [])
 
   useEffect(() => {
     fetchEmployees()
@@ -58,7 +70,7 @@ export default function EmployeesPage() {
         ...(status !== "all" && { status }),
       })
 
-      const response = await fetch(`/api/employees?${params}`)
+      const response = await api.get(`/employees?${params}`)
       const data = await response.json()
 
       if (response.ok) {
@@ -76,9 +88,7 @@ export default function EmployeesPage() {
     if (!confirm("Are you sure you want to delete this employee?")) return
 
     try {
-      const response = await fetch(`/api/employees/${id}`, {
-        method: "DELETE",
-      })
+      const response = await api.delete(`/employees/${id}`)
 
       if (response.ok) {
         fetchEmployees()
@@ -216,7 +226,7 @@ export default function EmployeesPage() {
                               <Edit className="h-4 w-4" />
                             </Link>
                           </Button>
-                          {session?.user.role === "ADMIN" && (
+                          {userRole === "ADMIN" && (
                             <Button variant="ghost" size="sm" onClick={() => handleDelete(employee.id)}>
                               <Trash2 className="h-4 w-4" />
                             </Button>

@@ -1,7 +1,15 @@
 "use client"
 
 import { useState, useEffect, createContext, useContext, type ReactNode } from "react"
-import { type User, getAuthToken, clearAuthToken } from "@/lib/auth-utils"
+
+interface User {
+  id: number
+  email: string
+  name: string
+  role: string
+  companyId: number
+  employeeId?: string
+}
 
 interface AuthContextType {
   user: User | null
@@ -18,8 +26,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Check for existing auth token on mount
-    const existingUser = getAuthToken()
-    setUser(existingUser)
+    const token = localStorage.getItem("token")
+    const email = localStorage.getItem("email")
+    if (token && email) {
+      // For now, create user object from stored data
+      // In real app, decode JWT to get user info
+      const user: User = {
+        id: 1, // placeholder
+        email,
+        name: email.split('@')[0],
+        role: email.includes("admin") ? "ADMIN" : email.includes("hr") ? "HR" : "EMPLOYEE",
+        companyId: 1, // placeholder
+      }
+      setUser(user)
+    }
     setIsLoading(false)
   }, [])
 
@@ -28,7 +48,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = () => {
-    clearAuthToken()
+    localStorage.removeItem("token")
+    localStorage.removeItem("email")
     setUser(null)
   }
 

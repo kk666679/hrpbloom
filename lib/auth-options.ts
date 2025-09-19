@@ -25,9 +25,9 @@ export const authOptions = {
         // For demo purposes, check against simple passwords
         // In production, use proper password hashing
         const validPasswords = {
-          ADMIN: "admin123",
-          HR: "hr123",
-          EMPLOYEE: "employee123",
+          ADMIN: "demo123",
+          HR: "demo123",
+          EMPLOYEE: "demo123",
         }
 
         const expectedPassword = validPasswords[user.role as keyof typeof validPasswords]
