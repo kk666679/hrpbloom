@@ -36,7 +36,7 @@ export const Navbar = () => {
           onClick={() => router.push("/")}
         >
           <img src="https://oq1gkkfo4q0hj5xi.public.blob.vercel-storage.com/images/Sleek%20Flat%20Design%20Logo%20in%20Blue%20and%20Green_20250918_023037_0000.svg" alt="Company Logo" className="w-10 h-10" />
-          <span>MyCompany</span>
+          <span>HRPBLooM</span>
         </div>
 
         {/* Desktop Navigation Links */}

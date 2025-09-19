@@ -1,3 +1,13 @@
+ gh repo create hrpbloom-backend --public --description "NestJS Backend for HR Portal - Employee Management, Job Portal, and Dashboard API"
+GraphQL: Resource not accessible by integration (createRepository)
+@kk666679 ➜ /workspaces/hrpbloom (main) $ 
+
+
+
+
+
+
+
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
